@@ -1,9 +1,18 @@
+import { TextureLoader,MeshLambertMaterial } from 'three';
+import { useLoader } from '@react-three/fiber';
+
 const Plane = () => {
+    const [floorMap, ceilingMap] = useLoader(TextureLoader, ['Floor.jpg', 'OfficeCeiling005_4K_Color.jpg']);
+    
     return (
-        <mesh position={[0, 0, 0]}>
-            <planeBufferGeometry attach="geometry" args={[50, 50]} />
-            <meshStandardMaterial color={"#404040"} />
-        </mesh>
+        <group>
+            <mesh position={[0, 0, -10]}>
+                <planeBufferGeometry attach="geometry" args={[80, 80]} /><meshStandardMaterial map={floorMap} /> 
+            </mesh>
+            <mesh rotation={[0,-3.14,3.14/2]} position={[0, 0, 10]} >
+                <planeBufferGeometry attach="geometry" args={[80, 80]} /><meshStandardMaterial map={ceilingMap} /> 
+            </mesh>
+        </group>
     );
 }
 

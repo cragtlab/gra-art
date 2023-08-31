@@ -24,6 +24,9 @@
 ### 2. Install Dependencies:
 `$ npm install `
 
+### 2a. Install Ganache and Truffle
+npm install -g truffle
+
 ### 2a. Run Ganache
 npx ganache-cli
 * Make sure the chainId matches your Land.js, and port match the truffle-config.js
@@ -38,3 +41,16 @@ npx ganache-cli
 
 ### 5. Start Frontend
 `$ npm start`
+
+### 6. Update Metamask Network 
+For Ganache
+* Add local Ganache https://chainlist.org/?search=ganache&testnets=true
+* Import private keys of ganache server into metamask
+For Polygon Testnet
+* npm install @truffle/hdwallet-provider
+* npx truffle migrate --reset --network matic
+* (maybe no need) npx truffle deploy --network matic
+* Add Polygon Mumbai testnet https://chainlist.org/chain/80001
+For Source Code Verification to interact with contract via Polygon (e.g. withdraw money in contract out)
+* npm install truffle-plugin-verify
+* npx truffle run verify Land --network matic --debug

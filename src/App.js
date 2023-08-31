@@ -1,16 +1,22 @@
 import Web3 from 'web3';
+
 import { Suspense, useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
+import { PointerLockControls } from '@react-three/drei'
 import { Sky, MapControls } from '@react-three/drei';
-import { Physics } from '@react-three/cannon';
+
+import { PerspectiveCamera } from '@react-three/drei'
+import { Physics, useSphere } from '@react-three/cannon';
+import { FirstPersonControls, FlyControls } from '@react-three/drei';
 
 // Import CSS
 import './App.css';
 
 // Import Components
+import Walls from "./components/Walls";
 import Navbar from './components/Navbar';
 import Plane from './components/Plane';
-import Plot from './components/Plot';
+//import Plot from './components/Plot'; 
 import Building from './components/Building';
 
 // Import ABI
@@ -73,15 +79,17 @@ function App() {
 			setAccount(accounts[0])
 		}
 	}
-
+	
 	useEffect(() => {
 		loadBlockchainData()
+
 	}, [account])
+
+	
 
 	const buyHandler = async (_id) => {
 		try {
-			await landContract.methods.mint(_id).send({ from: account, value: '1000000000000000000' })
-
+			await landContract.methods.mint(_id).send({ from: account, value: '1000000000000000' }) // 0.001
 			const buildings = await landContract.methods.getBuildings().call()
 			setBuildings(buildings)
 
@@ -92,39 +100,32 @@ function App() {
 			window.alert('Error occurred when buying')
 		}
 	}
-
+	
 	return (
 		<div>
+			
 			<Navbar web3Handler={web3Handler} account={account} />
-			<Canvas camera={{ position: [0, 0, 30], up: [0, 0, 1], far: 10000 }}>
+			<Canvas camera={{position: [0,-20,2]}}>
+			 {/*	<PerspectiveCamera					
+					aspect={window.innerWidth/window.innerHeight} fov="70"
+	/>				*/}
+			 {/*camera={{ position: [0, 0, 10], up: [0, 0, 1], far: 1000 }}>*/}
+				
 				<Suspense fallback={null}>
 					<Sky distance={450000} sunPosition={[1, 10, 0]} inclination={0} azimuth={0.25} />
-
-					<ambientLight intensity={0.5} />
-
+					<ambientLight intensity={0.5} />					
+					
 					{/* Load in each cell */}
 					<Physics>
 						{buildings && buildings.map((building, index) => {
-							/*if (building.owner === '0x0000000000000000000000000000000000000000') {
-								return (
-									<Plot
-										key={index}
-										position={[building.posX, building.posY, 0.1]}
-										size={[building.sizeX, building.sizeY]}
-										landId={index + 1}
-										landInfo={building}
-										setLandName={setLandName}
-										setLandOwner={setLandOwner}
-										setHasOwner={setHasOwner}
-										setLandId={setLandId}
-									/>
-								)
-							} else {*/
+							
 								return (
 									<Building
 										key={index}
-										position={[building.posX, building.posY, 0.1]}
-										size={[building.sizeX, building.sizeY, building.sizeZ]}
+										//position={[building.posX, building.posY, 0.1]}
+										position={[-20+index*10, 40, 0.1]}
+										size={[8,0.1,8]}
+										//size={[building.sizeX, building.sizeY, building.sizeZ]}
 										landId={index + 1}
 										landInfo={building}
 										setLandName={setLandName}
@@ -135,11 +136,22 @@ function App() {
 								)
 							//}
 						})}
+						
 					</Physics>
-
-					<Plane />
+					
+				    <Walls />
+					<Plane />				
 				</Suspense>
-				<MapControls />
+				
+				<FirstPersonControls movementSpeed="15" lookSpeed="0.000001" lookVertical="False" activeLook="False" /> 
+				
+				{/*lookVertical="false"/> */}
+				{/*<FirstPersonControls movementSpeed="5"  /> 
+				
+				<MapControls />  
+				 
+				
+				*/}
 			</Canvas>
 
 			{landId && (
@@ -149,18 +161,18 @@ function App() {
 					<div className='flex-left'>
 						<div className='info--id'>
 							<h2>ID</h2>
-							<p>{landId}</p>
+							<p><u><a href={`https://testnets.opensea.io/assets/mumbai/0xd0674b72dec23984526f9c502edd91bb8b0317a1/${landId}`}>{landId}</a></u></p>
 						</div>
 
 						<div className='info--owner'>
 							<h2>Owner</h2>
-							<p>{landOwner}</p>
+							<p><u><a href={`https://testnets.opensea.io/${landOwner}`}>{landOwner && (landOwner.substring(0, 30) + "...")}</a></u></p>
 						</div>
 
 						{!hasOwner && (
 							<div className='info--owner'>
 								<h2>Cost</h2>
-								<p>{`${cost} ETH`}</p>
+								<p>{`${cost}`}</p>
 							</div>
 						)}
 					</div>

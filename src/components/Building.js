@@ -1,7 +1,5 @@
-
-import { TextureLoader } from 'three';
 import { useLoader } from '@react-three/fiber';
-
+import { TextureLoader } from 'three';
 // Import Assets
 import MetalMap from '../assets/MetalMap.png';
 import MetalNormalMap from '../assets/MetalNormalMap.png';
@@ -105,8 +103,7 @@ const Building = ({ position, size, landId, landInfo, setLandName, setLandOwner,
     
     return (
         <mesh position={position} onClick={clickHandler}>
-            <boxBufferGeometry args={size} />
-            
+            <boxBufferGeometry args={size} />        
             <meshStandardMaterial map={color} normalMap={surface} metalness={0.25} />
         </mesh>
     );

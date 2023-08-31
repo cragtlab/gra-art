@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract Land is ERC721 {
-    uint256 public cost = 1 ether;
+    uint256 public cost = 0.001 ether;
     uint256 public maxSupply = 5;
     uint256 public totalSupply = 0;
 
@@ -26,7 +26,7 @@ contract Land is ERC721 {
         string memory _symbol,
         uint256 _cost
     ) ERC721(_name, _symbol) {
-        cost = _cost;
+        _cost = cost;         
 
         buildings.push(
             Building("City Hall", address(0x0), 0, 0, 0, 10, 10, 10)
@@ -41,6 +41,9 @@ contract Land is ERC721 {
         buildings.push(
             Building("Shopping Plaza 2", address(0x0), -10, 0, 0, 5, 25, 5)
         );
+    }
+    function _baseURI() internal pure override returns (string memory) {
+        return "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
     }
 
     function mint(uint256 _id) public payable {
