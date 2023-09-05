@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 
-const Character = ({characterRef, position=[0,-15,2], movement}) => {
+const Character = ({characterRef, position=[0,-19,1], movement}) => {
     const movementSpeed = 0.3;
     const rotateSpeed=0.05;
 

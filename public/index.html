@@ -1,16 +1,501 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />    
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />    
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />    
-    <title>GRA GTD Art Gallery</title>    
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>        
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Two-Level Maze with Keyboard Movement and Rotation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #positionInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        #paintingInfo {
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            top: 30px;
+            padding: 10px;
+            left: 70px;
+            font-family: Helvetica Neue Light;
+            font-size: 18px;
+        }
+
+        #chatbox {
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 10px;
+            padding: 10px;
+            left: 10px;
+            font-family: Helvetica Neue Light;
+            font-size: 18px;
+        }
+
+        #chatarea {
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 60px;
+            padding: 10px;
+            overflow: auto;
+            left: 10px;
+            height: 100px;
+            font-family: Helvetica Neue Light;
+            font-size: 18px;
+        }
+
+        #connectBtn {
+            position: absolute;
+            right: 30px;
+            padding: 15px;
+            background: #1D8482;
+            color: #E0F1FF;
+        }
+    </style>
+    </style>
+</head>
+
+<body>
+    <!-- Add a button to switch between levels -->
+    <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
+    <canvas id='canvas'></canvas>
+    <div id='positionInfo'></div>
+    <div id='paintingInfo'></div>
+    <div id='chatarea'><b>System: </b>Buy a <a target=_blank href=''>VIP NFT</a> to enter the 2nd level<br /><b>System:
+        </b>Welcome to the GRA Art Gallery</div>
+    <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        var playerPositions = [
+            { geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 } }
+        ];
+        const playerMeshs = [];
+        const fakePlayerMeshs = [];
+
+        function addMessage(sender, msg) {
+            if (sender == "Me") {
+                sendMessage(msg);
+            }
+            chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+        }
+        function renderPlayerPositions() {
+            //clearExistingPlayers();
+            while (mesh = playerMeshs.pop()) {
+                scene.remove(mesh);
+            }
+            // renderer.renderLists.dispose();            
+            for (player of playerPositions) {
+                //console.log(player.position);
+                playerMeshs.push(createCharacter(player.geoChoice, player.colorChoice, player.position));
+            }
+            //console.log(playerMeshs)
+            // pretend for activity
+            if (fakePlayerMeshs.length == 0) {
+                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
+                fakePlayerMeshs.push(createCharacter(2, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
+                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
+            } else {
+                for (playerMesh of fakePlayerMeshs) {
+                    playerMesh.translateX(Math.random() > 0.8 ? 0.01 : -0.01);
+                    playerMesh.translateZ(Math.random() > 0.8 ? 0.01 : -0.01);
+                }
+            }
+
+
+            //renderPlayers();
+        }
+
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas") });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+        // Create a floor for the room
+        const floorGeometry = new THREE.PlaneGeometry(10, 10);
+        const floorTexture = new THREE.TextureLoader().load('Floor.jpg'); // Load your painting image
+        const floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
+        //const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = Math.PI / 2;
+
+        scene.add(floor);
+
+        const floor_2 = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor_2.rotation.x = Math.PI / 2;
+        floor_2.position.set(0, 2.5, 0);
+        scene.add(floor_2);
+
+        // Create a maze matrix (3 for painting hung on wall on top, 2 for painting hung below wall,1s represent walls, 0s represent empty spaces)
+        const mazeMatrix = [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 2, 0, 2, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 3, 3, 3, 0, 1],
+            [1, 0, 2, 2, 2, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+        ];
+        const level2Matrix = [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 2, 2, 2, 2, 2, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+        ];
+
+
+        // Create maze walls based on the matrix
+        const level_2_start = 2.5;
+        const painting_zAdjust = 0.45;
+        //const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 });
+        const wallTexture = new THREE.TextureLoader().load('MetalNormalMap.png');
+        const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
+
+        paintings = [];
+        const wallSize = 1; // Adjust the size of maze walls as needed
+        //const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x004040, side: THREE.DoubleSide });
+        for (let row = 0; row < mazeMatrix.length; row++) {
+            for (let col = 0; col < mazeMatrix[row].length; col++) {
+                if (mazeMatrix[row][col] === 1) {
+                    const wallGeometry = new THREE.BoxGeometry(wallSize, level_2_start, wallSize);
+
+
+                    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall.position.set(col - mazeMatrix.length / 2, level_2_start / 2 - 0.1, row - mazeMatrix[row].length / 2);
+                    scene.add(wall);
+                } else if (mazeMatrix[row][col] === 2 || mazeMatrix[row][col] === 3) {
+                    const paintingGeometry = new THREE.PlaneGeometry(0.75, 0.75); // Adjust size as needed
+                    const adjustType = (mazeMatrix[row][col] == 2 ? 1 : -1);
+                    const paintingTexture = new THREE.TextureLoader().load('assets/' + (paintings.length + 1) + '.png'); // Load your painting image
+                    const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
+
+                    const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
+                    paintings.push(painting);
+                    painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
+                    scene.add(painting);
+                }
+            }
+        }
+
+        for (let row = 0; row < level2Matrix.length; row++) {
+            for (let col = 0; col < level2Matrix[row].length; col++) {
+                if (level2Matrix[row][col] === 1) {
+                    const wallGeometry = new THREE.BoxGeometry(wallSize, level_2_start, wallSize);
+                    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                    wall.position.set(col - mazeMatrix.length / 2, level_2_start * 1.5, row - mazeMatrix[row].length / 2);
+                    scene.add(wall);
+                } else if (level2Matrix[row][col] === 2 || level2Matrix[row][col] === 3) {
+                    const paintingGeometry = new THREE.PlaneGeometry(0.75, 0.75); // Adjust size as needed
+                    const adjustType = (level2Matrix[row][col] == 2 ? 1 : -1);
+                    const paintingTexture = new THREE.TextureLoader().load('assets/' + (paintings.length + 1) + '.png'); // Load your painting image
+                    const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
+
+                    const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
+                    paintings.push(painting);
+                    painting.position.set(col - level2Matrix.length / 2, level_2_start * 1.5 - 0.6, row - level2Matrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
+                    scene.add(painting);
+                }
+            }
+        }
+
+        // Create a lift geometry
+        const liftGeometry = new THREE.CylinderBufferGeometry(0.5, 0.5, 5, 32);
+        const liftMaterial = new THREE.MeshBasicMaterial({ color: 0x0099ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+        const liftMesh = new THREE.Mesh(liftGeometry, liftMaterial);
+        // Position the button in the scene
+        liftMesh.position.set(-2, 0.05, 0.9);
+        // Add the button to the scene
+        scene.add(liftMesh);
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selectedObject = null;
+        let moveY = false;
+        let exitedLift = true;
+        window.addEventListener('mousemove', (event) => {
+            // Update the mouse coordinates when the mouse moves
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+        window.addEventListener('click', () => {
+            // Check for intersections with the cube when clicked
+            raycaster.setFromCamera(mouse, camera);
+            if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
+                //    moveWithLift();
+            } else if (raycaster.intersectObjects(paintings).length > 0) {
+                const clickedPainting = raycaster.intersectObjects(paintings)[0].object;
+                const clickedPaintingIndex = paintings.indexOf(clickedPainting);
+                const id = clickedPaintingIndex + 1;
+                //console.log(clickedPainting);
+                paintingInfo.innerHTML =
+                    "<a id='paintingName' target=_blank>Painting #" + id
+                    + "</a>"
+                    + "<br/>Owner: <a target='blank' id='ownerHref'></a>"
+                    + "<br/><input type='button' id='" + (id) + "'>";
+
+                getPainting(clickedPaintingIndex).then((painting) => { // 0-based
+                    paintingName.href = "https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id;
+                    paintingName.textContent = "Painting #" + id + " (" + painting.name + ")";
+                    ownerHref.href = "https://testnets.opensea.io/" + painting.owner;
+                    button = document.querySelector("input[id='" + id + "']");
+                    if (painting.owner === "0x0000000000000000000000000000000000000000") { // unowned
+                        ownerHref.innerHTML = "Not Owned";
+                        ownerHref.href = "";
+                        button.value = "Mint";
+                        button.onclick = function () { mintPainting(this.id) };
+                    } else if (painting.owner === accounts[0]) { // owner is self, can list
+                        ownerHref.innerHTML = "<b>You</b>";
+                        button.onclick = function () {
+                            var price = prompt("Price to List At");
+                            if (price) {
+                                //window.open("https://testnets.opensea.io/assets/mumbai/"+paintingAddress+"/"+id);
+                                listPainting(id, price);
+                            }
+                        };
+
+                        if (painting.list_price === "0") { // not listed yet
+                            button.value = "List for Sale";
+                        } else {
+                            button.value = "Listed for "+painting.list_price+". Update List Price (0 to unlist)";
+                        }
+
+
+                    } else {
+                        ownerHref.innerHTML = painting.owner;
+                        if (painting.list_price === "0") {
+                            button.value = "Not For Sale (View On OpenSea)";
+                            button.onclick = function () {
+                                window.open("https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id);
+                            };
+                        } else {
+                           
+                            button.value = "Buy (Listed at "+painting.list_price+")";
+                            button.onclick = function () { buyPainting(this.id) };
+                        }
+                    }
+                });
+
+            }
+        });
+
+
+        function moveWithLift() {
+            if (true) {
+                moveY = true;
+                exitedLift = false;
+            } else {
+                //alert("Buy a VIP NFT to enter the HL Zone");
+            }
+        }
+        /*
+        // Create text geometry
+        const loader = new THREE.FontLoader();
+        // https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json
+        loader.load('helvetiker_regular.typeface.json', function (font) { // Replace 'your-font-file.json' with the path to your font file
+          // Create text geometry
+          const textGeometry = new THREE.TextGeometry("HLGA", {
+            font: font,
+            size: 0.5,
+            height: 0.1,
+          });
+          // Create a material for the text
+          const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+          textMesh.position.set(-0.75, -0.25, 0.01);
+          // Add the text to the scene
+          scene.add(textMesh);
+          */
+
+        // Create a simple character (red cube) to represent the person walking in the room
+
+        // snowman
+        // Create snowman materials
+        const snowMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const coalMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const carrotMaterial = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+        // Bottom snowball
+        const bottomSnowball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), snowMaterial);
+        bottomSnowball.position.set(0, 0.5, 0);
+        scene.add(bottomSnowball);
+
+        // Top snowball
+        const topSnowball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), snowMaterial);
+        topSnowball.position.set(0, 0.6, 0);
+        bottomSnowball.add(topSnowball);
+        // Carrot nose
+        const carrotNose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 32), carrotMaterial);
+        carrotNose.position.set(0, 0.6, 0.2);
+        carrotNose.rotation.x = Math.PI / 2;
+        bottomSnowball.add(carrotNose);
+        // Right coal eye
+        const snowRightEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 32, 32), coalMaterial);
+        snowRightEye.position.set(0.1, 0.7, 0.2);
+        bottomSnowball.add(snowRightEye);
+        // Left coal eye
+        const snowLeftEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 32, 32), coalMaterial);
+        snowLeftEye.position.set(-0.1, 0.7, 0.2);
+        bottomSnowball.add(snowLeftEye);
+        bottomSnowball.rotation.y = -Math.PI / 2;
+
+        const randomColors = [0xff0000, 0x00ff00, 0x0000ff];
+        const randomGeoChoices = [new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.1, 0.2, 0.2)];
+
+        function createCharacter(geoChoice, colorChoice, pos) {
+            const characterGeometry = randomGeoChoices[geoChoice];
+            const characterMaterial = new THREE.MeshBasicMaterial({ color: randomColors[colorChoice] });
+            const character = new THREE.Mesh(characterGeometry, characterMaterial);
+            character.position.set(pos.x, pos.y, pos.z); // Initial position of the character
+            // Create eyes (spheres) and position them relative to the character
+            const eyeGeometry = new THREE.SphereGeometry(0.03, 32, 32);
+            const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            // Position the eyes relative to the character's head
+            leftEye.position.set(-0.05, 0.15, 0.1); // Adjust these values as needed
+            rightEye.position.set(0.05, 0.15, 0.1); // Adjust these values as needed
+            // Add the eyes to the character
+            character.add(leftEye);
+            character.add(rightEye);
+
+            scene.add(character);
+            return character;
+        }
+
+        /*
+            const blinkEyes = () => {
+                const closeEyes = () => {
+                    leftEye.scale.y = 0.1;
+                    rightEye.scale.y = 0.1;
+                };
+                const openEyes = () => {
+                    leftEye.scale.y = 1;
+                    rightEye.scale.y = 1;
+                }
+                blinkInterval = setInterval(() => {
+                    closeEyes();
+                    setTimeout(openEyes, 500);
+                }, 500);
+            }
+            blinkEyes();*/
+
+        geoChoice = Math.floor(Math.random() * randomGeoChoices.length);
+        colorChoice = Math.floor(Math.random() * randomColors.length);
+        character = createCharacter(geoChoice, colorChoice, { x: -2, y: 0.1, z: -2 });
+
+        // add text to character?
+        const loader = new THREE.FontLoader();
+        let font;
+
+        loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
+            (loadedFont) => {
+                font = loadedFont;
+
+                // Create a 3D text label
+                const textGeometry = new THREE.TextGeometry('Me', {
+                    font: font,
+                    size: 0.03, // Text size
+                    height: 0.005, // Extrusion depth
+                });
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
+                const textLabel = new THREE.Mesh(textGeometry, textMaterial);
+                textLabel.position.set(0.03, 0.2, 0); // Adjust position as needed
+                textLabel.rotation.y = Math.PI;
+                //textLabel.rotation.z=Math.PI/2;
+                character.add(textLabel);
+            });
+        // Initialize the camera for third-person view
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // Animation parameters
+        const movementSpeed = 0.03;
+        var camY = 0.2;
+        // Handle keyboard input for character movement
+        const keys = {};
+        document.addEventListener('keydown', (event) => {
+            if (event.srcElement != chatbox) keys[event.key] = true;
+        });
+        document.addEventListener('keyup', (event) => {
+            keys[event.key] = false;
+        });
+
+        // Animation loop
+        let moveDown = false;
+        function animate() {
+            requestAnimationFrame(animate);
+            if (moveY) { // moving up/down lift
+                character.position.z = 0.6; character.position.x = -2;
+                if (character.position.y >= 2.6 || moveDown) {
+                    moveDown = true;
+                    camY -= 2 * movementSpeed; character.translateY(-2 * movementSpeed);
+                    if (character.position.y <= 0.1) {
+                        moveY = false; moveDown = false;
+                    }
+                } else {
+                    camY += 2 * movementSpeed; character.translateY(2 * movementSpeed);
+                    if (character.position.y >= 2.6) { moveY = false; }
+                }
+            } else {
+                // Move the character forward
+                if (keys['ArrowUp'] || keys["w"] || keys["W"]) {
+                    character.translateZ(movementSpeed);
+                }
+                if (keys['ArrowDown'] || keys["s"] || keys["S"]) {
+                    character.translateZ(-movementSpeed);
+                }
+                if (keys['ArrowLeft'] || keys["a"] || keys["A"]) {
+                    character.rotation.y += 0.05;
+                }
+                if (keys['ArrowRight'] || keys["d"] || keys["D"]) {
+                    character.rotation.y -= 0.05;
+                }
+                if (keys['R'] || keys['r']) {
+                    character.translateY(movementSpeed);
+                    camY += movementSpeed;
+                }
+                if (keys['F'] || keys['f']) {
+                    character.translateY(-movementSpeed);
+                    camY -= movementSpeed;
+                }
+                // auto up/down
+                const characterBox = new THREE.Box3().setFromObject(character);
+                const liftBox = new THREE.Box3().setFromObject(liftMesh);
+                if (characterBox.intersectsBox(liftBox)) {
+                    if (exitedLift) { moveWithLift(); }
+                } else {
+                    exitedLift = true;
+                }
+            }
+
+            // Update the camera's position to follow the character
+            const distance = 0.6; // Distance between character and camera
+            const angle = character.rotation.y; // Angle of rotation
+            const xOffset = distance * Math.sin(angle);
+            const zOffset = 0.7 * Math.cos(angle);
+            camera.position.set(character.position.x - xOffset, camY, character.position.z - zOffset);
+            camera.lookAt(character.position);
+            renderer.render(scene, camera);
+            positionInfo.innerText = (character.position.toArray());
+        }
+        animate();
+    </script>
+    <!-- somehow 4.1.1 will have revert error -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
+    <script src="web3.js"></script>
+</body>
+
 </html>

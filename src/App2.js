@@ -103,6 +103,7 @@ function App() {
 	// movement and camera
 	const cameraRef = useRef();
 	const characterRef = useRef();
+	const [cameraPos, setCameraPos] = useState({x:0, y:-20, z:2});
 	const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });  
 	useEffect(() => {
 		const handleKeyDown = (e) => {
@@ -111,7 +112,7 @@ function App() {
 		  if (e.key === 'ArrowLeft'  || e.key === 'a') setMovement({ ...movement, left: true });
 		  if (e.key === 'ArrowRight'  || e.key === 'd') setMovement({ ...movement, right: true });
 
-		  const distance = 3;
+		  const distance = 5;
 		  const angle = characterRef.current.rotation.y;
 		  const charPos = characterRef.current.position;
 		  const offset = distance * Math.sin(angle);
@@ -119,9 +120,10 @@ function App() {
 		  console.log(charPos);
 		  console.log("before/after");
 		  console.log(cameraRef.current.position);
-		  cameraRef.current.position.set(charPos.x - offset, 1.5, charPos.z - offset);
+		  cameraRef.current.position.set(charPos.x-offset, charPos.y - 1, 1);
 		  cameraRef.current.lookAt(charPos);
 		  console.log(cameraRef.current.position);
+		  //setCameraPos({x: charPos.x-offset, y:1.5, z:charPos.z-offset})
 		};
 	
 		const handleKeyUp = (e) => {
@@ -144,17 +146,18 @@ function App() {
 			
 			<Navbar web3Handler={web3Handler} account={account} />
 			<Canvas camera={{position:[0,-20,1]}}>	
-			 	 {/* <PerspectiveCamera					
+				{/*camera={{position:[0,-20,1]}}*/}
+			 	  <PerspectiveCamera					
 					ref={cameraRef}
 					up={[0,0,1]}
 					//rotation_order={"ZYX"}
-					position={[0,-20,1]}
-					//aspect={window.innerWidth/window.innerHeight} 
+					//position={cameraPos}
+					aspect={window.innerWidth/window.innerHeight} 
 					fov={70}
 					near={0.1}
-					far={1000}
+					far={1000}					
 					makeDefault
-				 /> */}				
+				 /> 				
 		
 				<Suspense fallback={null}>
 					<Sky distance={450000} sunPosition={[1, 10, 0]} inclination={0} azimuth={0.25} />
@@ -188,14 +191,13 @@ function App() {
 				    <Walls />
 					<Plane />				
 				</Suspense>
-				<FirstPersonControls lookSpeed={0.00000001} movementSpeed="20"  /> 
+				
 				
 				{/*lookVertical="false"/> */}
 				{/*<FirstPersonControls movementSpeed="5"  /> 
 				<PointerLockControls />
 				<MapControls />  
-				 
-				
+				 <FirstPersonControls lookSpeed={0.00000001} movementSpeed="20"  /> 
 				*/}
 			</Canvas>
 
