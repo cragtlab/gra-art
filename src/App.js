@@ -1,8 +1,8 @@
 import Web3 from 'web3';
 
-import { Suspense, useState, useEffect } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { PointerLockControls } from '@react-three/drei'
+import { Suspense, useState, useEffect, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Point, PointerLockControls } from '@react-three/drei'
 import { Sky, MapControls } from '@react-three/drei';
 
 import { PerspectiveCamera } from '@react-three/drei'
@@ -13,16 +13,19 @@ import { FirstPersonControls, FlyControls } from '@react-three/drei';
 import './App.css';
 
 // Import Components
+
+import Character from "./components/Character"
 import Walls from "./components/Walls";
 import Navbar from './components/Navbar';
 import Plane from './components/Plane';
-//import Plot from './components/Plot'; 
 import Building from './components/Building';
 
 // Import ABI
 import Land from './abis/Land.json';
+import { Vector3 } from 'three';
 
 function App() {
+	
 	const [web3, setWeb3] = useState(null)
 	const [account, setAccount] = useState(null)
 
@@ -46,10 +49,6 @@ function App() {
 			if (accounts.length > 0) {
 				setAccount(accounts[0])
 			}
-			/**
-			 * 17Aug
-			 * * To get NFT
-			 */
 			
 			const networkId = await web3.eth.net.getId()
 			const land = new web3.eth.Contract(Land.abi, Land.networks[networkId].address)
@@ -80,9 +79,9 @@ function App() {
 		}
 	}
 	
+	//const controls=new PointerLockControls();
 	useEffect(() => {
 		loadBlockchainData()
-
 	}, [account])
 
 	
@@ -100,17 +99,63 @@ function App() {
 			window.alert('Error occurred when buying')
 		}
 	}
+
+	// movement and camera
+	const cameraRef = useRef();
+	const characterRef = useRef();
+	const [movement, setMovement] = useState({ forward: false, backward: false, left: false, right: false });  
+	useEffect(() => {
+		const handleKeyDown = (e) => {
+		  if (e.key === 'ArrowUp' || e.key === 'w') setMovement({ ...movement, forward: true });
+		  if (e.key === 'ArrowDown'  || e.key === 's') setMovement({ ...movement, backward: true });
+		  if (e.key === 'ArrowLeft'  || e.key === 'a') setMovement({ ...movement, left: true });
+		  if (e.key === 'ArrowRight'  || e.key === 'd') setMovement({ ...movement, right: true });
+
+		  const distance = 3;
+		  const angle = characterRef.current.rotation.y;
+		  const charPos = characterRef.current.position;
+		  const offset = distance * Math.sin(angle);
+		  console.log("charPos:");
+		  console.log(charPos);
+		  console.log("before/after");
+		  console.log(cameraRef.current.position);
+		  cameraRef.current.position.set(charPos.x - offset, 1.5, charPos.z - offset);
+		  cameraRef.current.lookAt(charPos);
+		  console.log(cameraRef.current.position);
+		};
 	
-	return (
+		const handleKeyUp = (e) => {
+		  if (e.key === 'ArrowUp'  || e.key === 'w') setMovement({ ...movement, forward: false });
+		  if (e.key === 'ArrowDown'  || e.key === 's') setMovement({ ...movement, backward: false });
+		  if (e.key === 'ArrowLeft'  || e.key === 'a') setMovement({ ...movement, left: false });
+		  if (e.key === 'ArrowRight'  || e.key === 'd') setMovement({ ...movement, right: false });
+		};
+	
+		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
+	
+		return () => {
+		  window.removeEventListener('keydown', handleKeyDown);
+		  window.removeEventListener('keyup', handleKeyUp);
+		};
+	  }, [movement]);
+	  return (
 		<div>
 			
 			<Navbar web3Handler={web3Handler} account={account} />
-			<Canvas camera={{position: [0,-20,2]}}>
-			 {/*	<PerspectiveCamera					
-					aspect={window.innerWidth/window.innerHeight} fov="70"
-	/>				*/}
-			 {/*camera={{ position: [0, 0, 10], up: [0, 0, 1], far: 1000 }}>*/}
-				
+			<Canvas camera={{position:[0,-20,1]}}>	
+			 	 {/* <PerspectiveCamera					
+					ref={cameraRef}
+					up={[0,0,1]}
+					//rotation_order={"ZYX"}
+					position={[0,-20,1]}
+					//aspect={window.innerWidth/window.innerHeight} 
+					fov={70}
+					near={0.1}
+					far={1000}
+					makeDefault
+				 /> */}				
+		
 				<Suspense fallback={null}>
 					<Sky distance={450000} sunPosition={[1, 10, 0]} inclination={0} azimuth={0.25} />
 					<ambientLight intensity={0.5} />					
@@ -138,16 +183,16 @@ function App() {
 						})}
 						
 					</Physics>
-					
+					<Character characterRef={characterRef} movement={movement} />
+
 				    <Walls />
 					<Plane />				
 				</Suspense>
-				
-				<FirstPersonControls movementSpeed="15" lookSpeed="0.000001" lookVertical="False" activeLook="False" /> 
+				<FirstPersonControls lookSpeed={0.00000001} movementSpeed="20"  /> 
 				
 				{/*lookVertical="false"/> */}
 				{/*<FirstPersonControls movementSpeed="5"  /> 
-				
+				<PointerLockControls />
 				<MapControls />  
 				 
 				
@@ -161,12 +206,12 @@ function App() {
 					<div className='flex-left'>
 						<div className='info--id'>
 							<h2>ID</h2>
-							<p><u><a href={`https://testnets.opensea.io/assets/mumbai/0xd0674b72dec23984526f9c502edd91bb8b0317a1/${landId}`}>{landId}</a></u></p>
+							<p><u><a target="_blank" href={`https://testnets.opensea.io/assets/mumbai/0xd0674b72dec23984526f9c502edd91bb8b0317a1/${landId}`}>{landId}</a></u></p>
 						</div>
 
 						<div className='info--owner'>
 							<h2>Owner</h2>
-							<p><u><a href={`https://testnets.opensea.io/${landOwner}`}>{landOwner && (landOwner.substring(0, 30) + "...")}</a></u></p>
+							<p><u><a target="_blank" href={`https://testnets.opensea.io/${landOwner}`}>{landOwner && (landOwner.substring(0, 30) + "...")}</a></u></p>
 						</div>
 
 						{!hasOwner && (
