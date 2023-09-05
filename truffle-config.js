@@ -8,7 +8,7 @@ module.exports = {
 			network_id: "*" // Match any network id
 		}, // https://chainlist.org/chain/80001
 		matic: {
-			provider: () => new HDWalletProvider("XXX", `https://rpc-mumbai.maticvigil.com`),
+			provider: () => new HDWalletProvider("XXXX", `https://rpc-mumbai.maticvigil.com`),
 			network_id: 80001,
 			confirmations: 2,
 			timeoutBlocks: 200,
