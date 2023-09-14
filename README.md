@@ -49,7 +49,7 @@ For Ganache
 For Polygon Testnet
 * npm install @truffle/hdwallet-provider
 * npx truffle migrate --reset --network matic
-* (maybe no need) npx truffle deploy --network matic
+* Open index.html with Live Server
 * Add Polygon Mumbai testnet https://chainlist.org/chain/80001
 For Source Code Verification to interact with contract via Polygon (e.g. withdraw money in contract out)
 * npm install truffle-plugin-verify
