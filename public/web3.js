@@ -96,7 +96,7 @@ socket.addEventListener('message', (event) => {
                 playerPositions.push({
                     geoChoice: message.data[key].geoChoice,
                     colorChoice: message.data[key].colorChoice,
-                    position: message.data[key].position
+                    position: message.data[key].position 
                 }
                 )
             }
