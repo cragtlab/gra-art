@@ -25,10 +25,13 @@
     "three": "^0.137.5",
     "truffle-plugin-verify": "^0.6.5",
     "web-vitals": "^2.1.4",
-    "web3": "^1.7.0"
+    "web3": "^1.7.0",
+    "live-server":"",
+    "ws":""
   },
   "scripts": {
     "start": "node src/server.js", 
+    "dev": "npx live-server",
     "oldstart": "set \"GENERATE_SOURCEMAP=false\" && react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",

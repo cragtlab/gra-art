@@ -136,14 +136,14 @@
         // Create a maze matrix (3 for painting hung on wall on top, 2 for painting hung below wall,1s represent walls, 0s represent empty spaces)
         const mazeMatrix = [
             [1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 1, 0, 1, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 2, 0, 2, 0, 1],
-            [1, 0, 1, 1, 1, 0, 1],
-            [1, 0, 1, 1, 1, 0, 1],
-            [1, 0, 3, 3, 3, 0, 1],
-            [1, 0, 2, 2, 2, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 2, 2, 2, 1],
+            [1, 0, 0, 1, 1, 1, 1],
+            [1, 0, 0, 3, 3, 3, 1],
+            [1, 2, 2, 2, 2, 2, 1],
             [1, 1, 1, 1, 1, 1, 1],
         ];
         const level2Matrix = [
@@ -164,7 +164,7 @@
         const level_2_start = 2.5;
         const painting_zAdjust = 0.45;
         //const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 });
-        const wallTexture = new THREE.TextureLoader().load('MetalNormalMap.png');
+        const wallTexture = new THREE.TextureLoader().load('Seamless wall white paint stucco plaster texture.jpg');
         const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
 
         paintings = [];
@@ -219,7 +219,7 @@
         const liftMaterial = new THREE.MeshBasicMaterial({ color: 0x0099ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
         const liftMesh = new THREE.Mesh(liftGeometry, liftMaterial);
         // Position the button in the scene
-        liftMesh.position.set(-2, 0.05, 0.9);
+        liftMesh.position.set(-3.96, 0.05, 0.9);
         // Add the button to the scene
         scene.add(liftMesh);
 
@@ -269,7 +269,7 @@
                             }
                         };
 
-                        if (painting.list_price === "0") { // not listed yet
+                        if (painting.list_price === "0" || painting.list_price == 0) { // not listed yet
                             button.value = "List for Sale";
                         } else {
                             button.value = "Listed for "+painting.list_price+". Update List Price (0 to unlist)";
@@ -278,7 +278,7 @@
 
                     } else {
                         ownerHref.innerHTML = painting.owner;
-                        if (painting.list_price === "0") {
+                        if (painting.list_price === "0"  || painting.list_price == 0) {
                             button.value = "Not For Sale (View On OpenSea)";
                             button.onclick = function () {
                                 window.open("https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id);
@@ -331,7 +331,7 @@
         const carrotMaterial = new THREE.MeshBasicMaterial({ color: 0xff6600 });
         // Bottom snowball
         const bottomSnowball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), snowMaterial);
-        bottomSnowball.position.set(0, 0.5, 0);
+        bottomSnowball.position.set(0, 0.5, 0.6);
         scene.add(bottomSnowball);
 
         // Top snowball
@@ -396,7 +396,7 @@
 
         geoChoice = Math.floor(Math.random() * randomGeoChoices.length);
         colorChoice = Math.floor(Math.random() * randomColors.length);
-        character = createCharacter(geoChoice, colorChoice, { x: -2, y: 0.1, z: -2 });
+        character = createCharacter(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
 
         // add text to character?
         const loader = new THREE.FontLoader();
@@ -438,11 +438,11 @@
         function animate() {
             requestAnimationFrame(animate);
             if (moveY) { // moving up/down lift
-                character.position.z = 0.6; character.position.x = -2;
+                character.position.z = 0.6; character.position.x = -3.96;
                 if (character.position.y >= 2.6 || moveDown) {
                     moveDown = true;
                     camY -= 2 * movementSpeed; character.translateY(-2 * movementSpeed);
-                    if (character.position.y <= 0.1) {
+                    if (character.position.y <= 0.16) {
                         moveY = false; moveDown = false;
                     }
                 } else {
