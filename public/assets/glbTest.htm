@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Walk/Idle Animation Control with Mixamo GLB Model in Three.js</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+
+  <script>
+    let isWalking = false;
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        isWalking = true;
+      }
+    });
+
+    document.addEventListener('keyup', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        isWalking = false;
+      }
+    });
+
+    // Setup Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+ let walkAction;
+
+    // Load GLB model and animations
+    const loader = new THREE.GLTFLoader();
+    // https://www.mixamo.com/#/?page=2&type=Character
+    // https://fabconvert.com/convert/fbx/to/glb
+    loader.load('4.glb', (gltf) => { 
+      const model = gltf.scene;
+
+      // Scale and position the model
+      model.scale.set(1, 1, 1);
+      model.position.set(0, 0, 0);
+
+      // Load animations
+      const mixer = new THREE.AnimationMixer(model);
+     
+      gltf.animations.forEach((clip) => {
+        const action = mixer.clipAction(clip);
+	if(!walkAction){ // just set if only 1
+	  walkAction = action;
+	  walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+	}else if (clip.name === 'Walk') { // Change to the correct walk animation name if got
+          walkAction = action;
+          walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+        } 
+        action.clampWhenFinished = false;
+      });
+
+      // Add the model to the scene
+      scene.add(model);
+
+      // Add a light
+      const light = new THREE.AmbientLight(0xffffff, 1);
+      scene.add(light);
+      camera.position.y = 1;
+      camera.position.z = 5;
+
+      // Animation loop
+      const animate = () => {
+        requestAnimationFrame(animate);
+
+        if (isWalking) {
+          walkAction.timeScale = 1.0; // Play walk animation
+        } else {
+          walkAction.timeScale = 0; // Pause walk animation
+        }
+        walkAction.play();
+        mixer.update(0.01); // Update the animation
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+    });
+  </script>
+</body>
+</html>
