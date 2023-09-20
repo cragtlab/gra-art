@@ -50,7 +50,7 @@ For Polygon Testnet
 * npm install @truffle/hdwallet-provider
 * npx truffle migrate --reset --network matic
 * npx truffle migrate --reset --network matic --compile-none (if got 32603 error with above)
-* Open index.html with Live Server  (npx run dev)
+* Open index.html with Live Server  (npx run web)
 * Add Polygon Mumbai testnet https://chainlist.org/chain/80001
 For Source Code Verification to interact with contract via Polygon (e.g. withdraw money in contract out)
 * npm install truffle-plugin-verify
