@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head> 
+<head>
     <meta charset="UTF-8">
     <title>Two-Level Maze with Keyboard Movement and Rotation</title>
     <style>
@@ -72,7 +72,7 @@
         </b>Welcome to the GRA Art Gallery</div>
     <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
         var playerPositions = [
             { geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 } }
@@ -272,20 +272,20 @@
                         if (painting.list_price === "0" || painting.list_price == 0) { // not listed yet
                             button.value = "List for Sale";
                         } else {
-                            button.value = "Listed for "+painting.list_price+". Update List Price (0 to unlist)";
+                            button.value = "Listed for " + painting.list_price + ". Update List Price (0 to unlist)";
                         }
 
 
                     } else {
                         ownerHref.innerHTML = painting.owner;
-                        if (painting.list_price === "0"  || painting.list_price == 0) {
+                        if (painting.list_price === "0" || painting.list_price == 0) {
                             button.value = "Not For Sale (View On OpenSea)";
                             button.onclick = function () {
                                 window.open("https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id);
                             };
                         } else {
-                           
-                            button.value = "Buy (Listed at "+painting.list_price+")";
+
+                            button.value = "Buy (Listed at " + painting.list_price + ")";
                             button.onclick = function () { buyPainting(this.id) };
                         }
                     }
@@ -303,26 +303,7 @@
                 //alert("Buy a VIP NFT to enter the HL Zone");
             }
         }
-        /*
-        // Create text geometry
-        const loader = new THREE.FontLoader();
-        // https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json
-        loader.load('helvetiker_regular.typeface.json', function (font) { // Replace 'your-font-file.json' with the path to your font file
-          // Create text geometry
-          const textGeometry = new THREE.TextGeometry("HLGA", {
-            font: font,
-            size: 0.5,
-            height: 0.1,
-          });
-          // Create a material for the text
-          const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-          const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-          textMesh.position.set(-0.75, -0.25, 0.01);
-          // Add the text to the scene
-          scene.add(textMesh);
-          */
 
-        // Create a simple character (red cube) to represent the person walking in the room
 
         // snowman
         // Create snowman materials
@@ -355,7 +336,6 @@
 
         const randomColors = [0xff0000, 0x00ff00, 0x0000ff];
         const randomGeoChoices = [new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.1, 0.2, 0.2)];
-
         function createCharacter(geoChoice, colorChoice, pos) {
             const characterGeometry = randomGeoChoices[geoChoice];
             const characterMaterial = new THREE.MeshBasicMaterial({ color: randomColors[colorChoice] });
@@ -376,49 +356,77 @@
             scene.add(character);
             return character;
         }
-
-        /*
-            const blinkEyes = () => {
-                const closeEyes = () => {
-                    leftEye.scale.y = 0.1;
-                    rightEye.scale.y = 0.1;
-                };
-                const openEyes = () => {
-                    leftEye.scale.y = 1;
-                    rightEye.scale.y = 1;
-                }
-                blinkInterval = setInterval(() => {
-                    closeEyes();
-                    setTimeout(openEyes, 500);
-                }, 500);
-            }
-            blinkEyes();*/
-
         geoChoice = Math.floor(Math.random() * randomGeoChoices.length);
         colorChoice = Math.floor(Math.random() * randomColors.length);
-        character = createCharacter(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
 
-        // add text to character?
-        const loader = new THREE.FontLoader();
-        let font;
+        // avatar 2.0
+        let walkAction;
+        let mixer;
+        let model;
+        const glbLoader = new THREE.GLTFLoader();
+        // https://www.mixamo.com/#/?page=2&type=Character
+        // https://fabconvert.com/convert/fbx/to/glb
+        glbLoader.load('assets/3.glb', (gltf) => {
+            model = gltf.scene;
 
-        loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
-            (loadedFont) => {
-                font = loadedFont;
+            // Scale and position the model
+            model.scale.set(0.18, 0.18, 0.18);
+            model.position.set(-2, 0, 0.61);
 
-                // Create a 3D text label
-                const textGeometry = new THREE.TextGeometry('Me', {
-                    font: font,
-                    size: 0.03, // Text size
-                    height: 0.005, // Extrusion depth
-                });
-                const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
-                const textLabel = new THREE.Mesh(textGeometry, textMaterial);
-                textLabel.position.set(0.03, 0.2, 0); // Adjust position as needed
-                textLabel.rotation.y = Math.PI;
-                //textLabel.rotation.z=Math.PI/2;
-                character.add(textLabel);
+            // Load animations
+            mixer = new THREE.AnimationMixer(model);
+            gltf.animations.forEach((clip) => {
+                const action = mixer.clipAction(clip);
+                if (!walkAction) { // just set if only 1
+                    walkAction = action;
+                    walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+                } else if (clip.name === 'Walk') { // Change to the correct walk animation name if got
+                    walkAction = action;
+                    walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+                }
+                action.clampWhenFinished = false;
             });
+
+            // Add the model to the scene
+            scene.add(model);
+            character = model;
+            addMeText(0.3, 0.28, 1.9);
+        });
+
+
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(light);
+        // to fix
+        function createCharacter2(geoChoice, colorChoice, pos) {
+            model.position.set(pos.x, pos.y, pos.z);
+            console.log("Character 2.0" + model);
+            character = model;
+        }
+        //character = createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
+        //createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
+        // addMeText(0.03, 0.2) // old character
+        function addMeText(fontsize, x,y) {
+            // add "Me" text to character?
+            const loader = new THREE.FontLoader();
+            let font;
+            loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
+                (loadedFont) => {
+                    font = loadedFont;
+
+                    // Create a 3D text label
+                    const textGeometry = new THREE.TextGeometry('Me', {
+                        font: font,
+                        size: fontsize, // Text size
+                        height: 0.005, // Extrusion depth
+                    });
+                    const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
+                    const textLabel = new THREE.Mesh(textGeometry, textMaterial);
+                    textLabel.position.set(x, y, 0); // Adjust position as needed
+                    textLabel.rotation.y = Math.PI;
+                    //textLabel.rotation.z=Math.PI/2;
+                    character.add(textLabel);
+                });
+        }
         // Initialize the camera for third-person view
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         // Animation parameters
@@ -426,28 +434,46 @@
         var camY = 0.2;
         // Handle keyboard input for character movement
         const keys = {};
+        let isWalking = false;
+        const walkingKeys = ["w", "W", "a", "A", "s", "S", "d", "D", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
         document.addEventListener('keydown', (event) => {
-            if (event.srcElement != chatbox) keys[event.key] = true;
+            if (event.srcElement != chatbox) {
+                keys[event.key] = true;
+                if (walkingKeys.indexOf(event.key) >= 0) {
+                    isWalking = true;
+                }
+            }
         });
         document.addEventListener('keyup', (event) => {
             keys[event.key] = false;
+            // set isWalking false unless any of walkingKey is still up then true 
+            if (walkingKeys.indexOf(event.key) >= 0) {
+                isWalking = false;
+                for (i of walkingKeys) {
+                    if (keys[i]) {
+                        isWalking = true;
+                    }
+                }
+            }
         });
 
         // Animation loop
         let moveDown = false;
+        let level2_y = 2.5 // 2.6 for createCharacter1
+        let level1_y = 0.06  // 0.16 for createCharacter1
         function animate() {
             requestAnimationFrame(animate);
             if (moveY) { // moving up/down lift
                 character.position.z = 0.6; character.position.x = -3.96;
-                if (character.position.y >= 2.6 || moveDown) {
+                if (character.position.y >= level2_y || moveDown) {
                     moveDown = true;
                     camY -= 2 * movementSpeed; character.translateY(-2 * movementSpeed);
-                    if (character.position.y <= 0.16) {
+                    if (character.position.y <= level1_y) {
                         moveY = false; moveDown = false;
                     }
                 } else {
                     camY += 2 * movementSpeed; character.translateY(2 * movementSpeed);
-                    if (character.position.y >= 2.6) { moveY = false; }
+                    if (character.position.y >= level2_y) { moveY = false; }
                 }
             } else {
                 // Move the character forward
@@ -480,6 +506,14 @@
                     exitedLift = true;
                 }
             }
+
+            if (isWalking) {
+                walkAction.timeScale = 1.0; // Play walk animation
+            } else {
+                walkAction.timeScale = 0; // Pause walk animation
+            }
+            walkAction.play();
+            mixer.update(0.01); // Update the animation
 
             // Update the camera's position to follow the character
             const distance = 0.6; // Distance between character and camera

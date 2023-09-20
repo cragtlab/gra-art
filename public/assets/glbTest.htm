@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Walk/Idle Animation Control with Mixamo GLB Model in Three.js</title>
   <style>
-    body { margin: 0; }
-    canvas { display: block; }
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      display: block;
+    }
   </style>
 </head>
+
 <body>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
 
   <script>
     let isWalking = false;
@@ -36,13 +43,13 @@
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
- let walkAction;
+    let walkAction;
 
     // Load GLB model and animations
     const loader = new THREE.GLTFLoader();
     // https://www.mixamo.com/#/?page=2&type=Character
     // https://fabconvert.com/convert/fbx/to/glb
-    loader.load('4.glb', (gltf) => { 
+    loader.load('3.glb', (gltf) => {
       const model = gltf.scene;
 
       // Scale and position the model
@@ -51,16 +58,15 @@
 
       // Load animations
       const mixer = new THREE.AnimationMixer(model);
-     
       gltf.animations.forEach((clip) => {
         const action = mixer.clipAction(clip);
-	if(!walkAction){ // just set if only 1
-	  walkAction = action;
-	  walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
-	}else if (clip.name === 'Walk') { // Change to the correct walk animation name if got
+        if (!walkAction) { // just set if only 1
           walkAction = action;
           walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
-        } 
+        } else if (clip.name === 'Walk') { // Change to the correct walk animation name if got
+          walkAction = action;
+          walkAction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+        }
         action.clampWhenFinished = false;
       });
 
@@ -92,4 +98,5 @@
     });
   </script>
 </body>
+
 </html>
