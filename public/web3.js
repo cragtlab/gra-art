@@ -80,8 +80,8 @@ socket.addEventListener('message', (event) => {
     message = JSON.parse(event.data);
     //console.log("received message " + message);
     if (message.type === "msg") {
-        if (message.sender === accounts[0]) {
-            //  console.log('ignore msg from self');
+        if (message.sender === (accounts[0].toLowerCase())) {
+              console.log('ignore msg from self');
         } else {
             addMessage(message.sender, message.msg);
         }
@@ -90,8 +90,8 @@ socket.addEventListener('message', (event) => {
         //console.log("received positions");
         playerPositions = [];
         for (key in message.data) {
-            if (key === accounts[0]) {
-                // ignore self
+            if (key === accounts[0].toLowerCase()) {
+                // ignore selfd")
             } else {
                 playerPositions.push({
                     geoChoice: message.data[key].geoChoice,

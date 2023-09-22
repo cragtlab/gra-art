@@ -19,7 +19,7 @@ server.on('connection', (client) => {
         }
       });
     }else if(messageType==="position"){
-      positions[data.sender]={
+      positions[data.sender.toLowerCase()]={
         geoChoice: data.geoChoice,
         colorChoice: data.colorChoice,
         position: data.position
