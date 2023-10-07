@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Two-Level Maze with Keyboard Movement and Rotation</title>
+    <title>GRA Art Gallery</title>
     <style>
         body {
             margin: 0;
@@ -22,9 +22,9 @@
         #paintingInfo {
             background-color: rgba(255, 255, 255, 0.9);
             position: absolute;
-            top: 30px;
+            top: 60px;
             padding: 10px;
-            left: 70px;
+            right: 20px;
             font-family: Helvetica Neue Light;
             font-size: 18px;
         }
@@ -39,16 +39,30 @@
             font-size: 18px;
         }
 
-        #chatarea {
+        .chatarea {
             background-color: rgba(255, 255, 255, 0.9);
             position: absolute;
-            bottom: 60px;
+            bottom: 85px;
             padding: 10px;
             overflow: auto;
             left: 10px;
-            height: 100px;
+            height: 200px;
             font-family: Helvetica Neue Light;
             font-size: 18px;
+            width: 600px;
+        }
+
+        #tabs {
+            position: absolute;
+            bottom: 50px;
+            padding: 10px;
+            overflow: auto;
+            left: 10px;
+            height: 30px;
+        }
+
+        .tab-content {
+            font-size: 28px;
         }
 
         #connectBtn {
@@ -68,15 +82,29 @@
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
     <div id='paintingInfo'></div>
-    <div id='chatarea'><b>System: </b>Buy a <a target=_blank href=''>VIP NFT</a> to enter the 2nd level<br /><b>System:
+
+    <div id='chatarea' class='chatarea'><b>System: </b>Buy a <a target=_blank href=''>VIP NFT</a> to enter the 2nd
+        level<br /><b>System:
         </b>Welcome to the GRA Art Gallery</div>
+    <div id='chatarea_direct' class='chatarea' style="display:none"></div>
+    <div id="tabs">
+        <button class="tab-content" onclick="showTab()">World</button>
+        <!-- <button class="tab-content" id="test" onclick="showTab(this.id)">0x23567</button>-->
+    </div>
     <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="three.min.js"></script>
+    <script src="GLTFLoader.js"></script>
+
+    <!-- change r98 accordingly https://rawcdn.githack.com/mrdoob/three.js/r98/examples/index.html -->
+    <!-- <script src="PointerLockControls.js"></script> -->
+    <!-- <script src="FirstPersonControls.js"></script> -->
+    <!-- <script src="CSS3DRenderer.js"></script> looks terrible to embed this way -->
     <script>
         var playerPositions = [
-            //{}  geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 } }
+            { geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 }, ry: -0.5 }
         ];
+        let toAddr;
+        let direct_messages = [];
         const playerMeshs = [];
         const fakePlayerMeshs = [];
 
@@ -84,7 +112,68 @@
             if (sender == "Me") {
                 sendMessage(msg);
             }
-            chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+            // if DM to others, just wait for it to return
+            if (!toAddr) {
+
+                chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+            }
+        }
+        function showWhoIsOnline() {
+            msg = playerPositions.length + " people online. Chat to them: ";
+            for (player of playerPositions) {
+                if (player.addr) { // only connected wallets
+                    msg += "<a href='#' onclick='showTab(\"" + player.addr + "\");return false'>" + player.addr + "</a> ";
+                }
+            }
+            chatarea.innerHTML = "<b>System: </b>" + msg + "<br/>" + chatarea.innerHTML;
+
+        }
+
+        // Function to create a new tab for a direct message
+        function createDirectMessageTab(otherAddr) {
+            const tabs = document.getElementById('tabs');
+            var found = false;
+            for (i of tabs.children) {
+                if (i.id == otherAddr) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                const tabContent = document.createElement('button');
+                tabContent.classList.add('tab-content');
+                tabContent.id = otherAddr;
+                tabContent.textContent = otherAddr.substring(0, 5) + "..";
+                tabContent.setAttribute("onclick", "showTab(this.id)");
+                tabs.appendChild(tabContent);
+            }
+        }
+        function showTab(otherAddr) {
+            toAddr = otherAddr;
+            if (otherAddr) {
+                createDirectMessageTab(otherAddr.toLowerCase()); // create button if dont have
+                chatarea_direct.innerHTML = "";
+                for (msg of direct_messages) {
+                    
+                    if (msg.to === accounts[0].toLowerCase() && msg.from === otherAddr.toLowerCase()) {
+                        chatarea_direct.innerHTML = "<b>He/She: </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
+                    } else if (msg.from === accounts[0].toLowerCase()  && msg.to === otherAddr.toLowerCase()) {
+                        chatarea_direct.innerHTML = "<b>Me: </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
+                    }
+                }
+                chatarea.style.display = 'none';
+                chatarea_direct.style.display = '';
+
+
+
+                chatbox.placeholder = "Messaging " + otherAddr;
+            } else {
+                chatarea.style.display = '';
+                chatarea_direct.style.display = 'none';
+                chatbox.placeholder = "Messaging World";
+            }
+
+            chatbox.focus();
         }
         function renderPlayerPositions() {
             //clearExistingPlayers();
@@ -94,14 +183,14 @@
             // renderer.renderLists.dispose();            
             for (player of playerPositions) {
                 //console.log(player.position);
-                playerMeshs.push(createCharacter(player.geoChoice, player.colorChoice, player.position));
+                playerMeshs.push(createCharacter(player.geoChoice, player.colorChoice, player.position, player.ry));
             }
             //console.log(playerMeshs)
             // pretend for activity
             if (fakePlayerMeshs.length == 0) {
-                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
-                fakePlayerMeshs.push(createCharacter(2, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
-                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }));
+                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }, 0));
+                fakePlayerMeshs.push(createCharacter(2, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }, 0));
+                fakePlayerMeshs.push(createCharacter(1, Math.floor(Math.random() * randomColors.length), { x: -4 + Math.random() * 4, y: 0.1, z: -3 + Math.random() * 4 }, 0));
             } else {
                 for (playerMesh of fakePlayerMeshs) {
                     playerMesh.translateX(Math.random() > 0.8 ? 0.01 : -0.01);
@@ -117,7 +206,21 @@
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas") });
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-
+        /*
+                var cssRenderer = new THREE.CSS3DRenderer();
+                cssRenderer.setSize(window.innerWidth, window.innerHeight);
+                cssRenderer.domElement.style.position = 'absolute';
+                cssRenderer.domElement.style.top = 0;
+                document.body.appendChild(cssRenderer.domElement);
+                // Create a video div and object for the YouTube video
+                var videoDiv = document.createElement('div');
+                //videoDiv.innerHTML = '<iframe width="320" height="180" src="https://www.youtube.com/embed/BWxMuQre3R8?autoplay=1" frameborder="0" allowfullscreen></iframe>';
+                videoDiv.innerHTML = '<iframe width="320" height="180" src="https://www.youtube.com/embed/BWxMuQre3R8?autoplay=1" frameborder="0" allowfullscreen></iframe>';
+                var videoObject = new THREE.CSS3DObject(videoDiv);
+                videoObject.scale.set(0.01, 0.01, 0.01);
+                videoObject.position.set(0, 1.5, -10); // Adjust the video position
+                scene.add(videoObject);
+        */
         // Create a floor for the room
         const floorGeometry = new THREE.PlaneGeometry(15, 15);
         const floorTexture = new THREE.TextureLoader().load('Floor.jpg'); // Load your painting image
@@ -127,23 +230,23 @@
         floor.rotation.x = Math.PI / 2;
 
         scene.add(floor);
-
-        const floor_2 = new THREE.Mesh(floorGeometry, floorMaterial);
+        const floorGeometry_2 = new THREE.PlaneGeometry(7, 7);
+        const floor_2 = new THREE.Mesh(floorGeometry_2, floorMaterial); // use back floor geometry if dont want open L2 concept
         floor_2.rotation.x = Math.PI / 2;
-        floor_2.position.set(0, 2.5, 0);
+        floor_2.position.set(0, 2.5, 0); // design 2 whereby open tall ceiling
         scene.add(floor_2);
 
-        // Create a maze matrix (3 for painting hung on wall on top, 2 for painting hung below wall,1s represent walls, 0s represent empty spaces)
+        // Create a maze matrix (4 for auction painting center (will span 3 space width?), 3 for painting hung on wall on top, 2 for painting hung below wall,1s represent walls, 0s represent empty spaces)
         const mazeMatrix = [
             [1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 2, 2, 2, 1],
-            [1, 0, 0, 1, 1, 1, 1],
-            [1, 0, 0, 3, 3, 3, 1],
-            [1, 2, 2, 2, 2, 2, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 4, 0, 0, 1],
             [1, 1, 1, 1, 1, 1, 1],
         ];
         const level2Matrix = [
@@ -166,7 +269,8 @@
         //const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 });
         const wallTexture = new THREE.TextureLoader().load('Seamless wall white paint stucco plaster texture.jpg');
         const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
-
+        let auction_painting;
+        let auction_painting_id = -1;
         paintings = [];
         const wallSize = 1; // Adjust the size of maze walls as needed
         //const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x004040, side: THREE.DoubleSide });
@@ -174,8 +278,6 @@
             for (let col = 0; col < mazeMatrix[row].length; col++) {
                 if (mazeMatrix[row][col] === 1) {
                     const wallGeometry = new THREE.BoxGeometry(wallSize, level_2_start, wallSize);
-
-
                     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
                     wall.position.set(col - mazeMatrix.length / 2, level_2_start / 2 - 0.1, row - mazeMatrix[row].length / 2);
                     scene.add(wall);
@@ -189,7 +291,27 @@
                     paintings.push(painting);
                     painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
                     scene.add(painting);
+                } else if (mazeMatrix[row][col] === 4) {
+                    const paintingGeometry = new THREE.PlaneGeometry(2, 2); // Adjust size as needed
+                    const adjustType = 1;
+                    const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide }); // black first until contract load?
+                    auction_painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
+                    auction_painting.position.set(col - mazeMatrix.length / 2, 1.4, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
+
+                    scene.add(auction_painting);
                 }
+            }
+        }
+        function loadAuctionPainting(id) {
+
+            auction_painting_id = id;
+            if (auction_painting_id > 0) {
+                model_auction.visible = true;
+                const paintingTexture = new THREE.TextureLoader().load('assets/' + (auction_painting_id) + '.png'); // Load your painting image
+                auction_painting.material = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
+            } else {
+                model_auction.visible = false;
+                auction_painting.material = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide });
             }
         }
 
@@ -198,7 +320,7 @@
                 if (level2Matrix[row][col] === 1) {
                     const wallGeometry = new THREE.BoxGeometry(wallSize, level_2_start, wallSize);
                     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-                    wall.position.set(col - mazeMatrix.length / 2, level_2_start * 1.5, row - mazeMatrix[row].length / 2);
+                    wall.position.set(col - mazeMatrix.length / 2, level_2_start * 1.49, row - mazeMatrix[row].length / 2);
                     scene.add(wall);
                 } else if (level2Matrix[row][col] === 2 || level2Matrix[row][col] === 3) {
                     const paintingGeometry = new THREE.PlaneGeometry(0.75, 0.75); // Adjust size as needed
@@ -238,6 +360,20 @@
             raycaster.setFromCamera(mouse, camera);
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
+            } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
+                if (auction_painting_id == 0) {
+                    paintingInfo.innerHTML = "No Auction Currently. Please wait for next auction";
+                } else {
+                    paintingInfo.innerHTML =
+                        "<a id='paintingName' target=_blank>Painting #" + auction_painting_id + "</a>"
+                        + "<br/>Message Artist: <a href='#' id='creator'></a> "
+                        + "<br/><iframe width=500 height=300 src=/public/index2.html></iframe>";
+
+                    getPainting(auction_painting_id - 1).then((painting) => {
+                        creator.setAttribute("onclick","showTab('" + painting.creator + "');return false;");
+                        creator.innerText = painting.creator;
+                    });
+                }
             } else if (raycaster.intersectObjects(paintings).length > 0) {
                 const clickedPainting = raycaster.intersectObjects(paintings)[0].object;
                 const clickedPaintingIndex = paintings.indexOf(clickedPainting);
@@ -247,6 +383,7 @@
                     "<a id='paintingName' target=_blank>Painting #" + id
                     + "</a>"
                     + "<br/>Owner: <a target='blank' id='ownerHref'></a>"
+                    + "<br/>Message Artist: <a href='#' id='creator'></a> "
                     + "<br/><input type='button' id='" + (id) + "'>";
 
                 getPainting(clickedPaintingIndex).then((painting) => { // 0-based
@@ -254,6 +391,10 @@
                     paintingName.textContent = "Painting #" + id + " (" + painting.name + ")";
                     ownerHref.href = "https://testnets.opensea.io/" + painting.owner;
                     button = document.querySelector("input[id='" + id + "']");
+                    // message creator
+                    creator.setAttribute("onclick","showTab('" + painting.creator + "');return false;");
+                    creator.innerText = painting.creator;
+
                     if (painting.owner === "0x0000000000000000000000000000000000000000") { // unowned
                         ownerHref.innerHTML = "Not Owned";
                         ownerHref.href = "";
@@ -304,43 +445,14 @@
             }
         }
 
-
-        // snowman
-        // Create snowman materials
-        const snowMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const coalMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const carrotMaterial = new THREE.MeshBasicMaterial({ color: 0xff6600 });
-        // Bottom snowball
-        const bottomSnowball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), snowMaterial);
-        bottomSnowball.position.set(0, 0.5, 0.6);
-        scene.add(bottomSnowball);
-
-        // Top snowball
-        const topSnowball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), snowMaterial);
-        topSnowball.position.set(0, 0.6, 0);
-        bottomSnowball.add(topSnowball);
-        // Carrot nose
-        const carrotNose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 32), carrotMaterial);
-        carrotNose.position.set(0, 0.6, 0.2);
-        carrotNose.rotation.x = Math.PI / 2;
-        bottomSnowball.add(carrotNose);
-        // Right coal eye
-        const snowRightEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 32, 32), coalMaterial);
-        snowRightEye.position.set(0.1, 0.7, 0.2);
-        bottomSnowball.add(snowRightEye);
-        // Left coal eye
-        const snowLeftEye = new THREE.Mesh(new THREE.SphereGeometry(0.025, 32, 32), coalMaterial);
-        snowLeftEye.position.set(-0.1, 0.7, 0.2);
-        bottomSnowball.add(snowLeftEye);
-        bottomSnowball.rotation.y = -Math.PI / 2;
-
         const randomColors = [0xff0000, 0x00ff00, 0x0000ff];
         const randomGeoChoices = [new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.2, 0.2, 0.2), new THREE.SphereGeometry(0.1, 0.2, 0.2)];
-        function createCharacter(geoChoice, colorChoice, pos) {
+        function createCharacter(geoChoice, colorChoice, pos, ry) {
             const characterGeometry = randomGeoChoices[geoChoice];
             const characterMaterial = new THREE.MeshBasicMaterial({ color: randomColors[colorChoice] });
             const character = new THREE.Mesh(characterGeometry, characterMaterial);
             character.position.set(pos.x, pos.y, pos.z); // Initial position of the character
+            character.rotation.y = ry;
             // Create eyes (spheres) and position them relative to the character
             const eyeGeometry = new THREE.SphereGeometry(0.03, 32, 32);
             const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -392,20 +504,90 @@
             character = model;
             addMeText(0.3, 0.28, 1.9);
         });
-
-
         const light = new THREE.AmbientLight(0xffffff, 1);
         scene.add(light);
+        /*var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        scene.add(directionalLight);
+        directionalLight.position.set(-2.5, 0.5, 1); 
+        directionalLight.lookAt(model_auction)*/
+
+        // load auctioner
+        let action_auction;
+        let mixer_auction;
+        let model_auction;
+        glbLoader.load('assets/auction.glb', (gltf) => {
+            model_auction = gltf.scene;
+
+            // Scale and position the model
+            model_auction.scale.set(0.5, 0.5, 0.5);
+            model_auction.position.set(-3.2, 0, 4)
+            model_auction.rotation.y = -3.5
+
+            // Create the rostrum geometry (You can customize the dimensions)
+            const rostrumGeometry = new THREE.BoxGeometry(0.2, 2.3, 0.1);
+            const rostrumMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+            // Create the rostrum mesh by combining the geometry and material
+            const rostrum = new THREE.Mesh(rostrumGeometry, rostrumMaterial);
+            // Position the rostrum
+            rostrum.position.set(0, 0, 0.5);
+            model_auction.add(rostrum); 0x8B4513
+
+            // Load animations
+            mixer_auction = new THREE.AnimationMixer(model_auction);
+            gltf.animations.forEach((clip) => {
+                const action = mixer_auction.clipAction(clip);
+                if (!action_auction) { // just set if only 1
+                    action_auction = action;
+                    action_auction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+                }
+
+            });
+            // add light as very dark
+            var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+            hemiLight.position.set(0, 10, 0);
+            scene.add(hemiLight);
+
+            // add light as very dark
+            var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+            hemiLight.position.set(0, 10, 0);
+            scene.add(hemiLight);
+
+            // Add the model to the scene
+            model_auction.visible = false;
+            scene.add(model_auction);
+
+        });
+        // load fake audience for auction (super lag for more )
+        load_fake_audience = false;
+        if (load_fake_audience) {
+            for (i = 0; i < 1; i++) {
+                let x = -1 - 0.6 * i; // declared so will be passed correctly
+                glbLoader.load('assets/auction.glb', (gltf, i) => {
+                    model_audience = gltf.scene;
+                    // Scale and position the model
+                    model_audience.scale.set(0.5, 0.5, 0.5);
+                    model_audience.position.set(x, 0, 3.09)
+                    //model_auction.rotation.y = 0
+                    // Add the model to the scene
+                    scene.add(model_audience);
+                });
+            }
+        }
+
+
+
         // to fix
-        function createCharacter2(geoChoice, colorChoice, pos) {
+        function createCharacter2(geoChoice, colorChoice, pos, ry) {
             model.position.set(pos.x, pos.y, pos.z);
+            model.rotation.y = ry;
             console.log("Character 2.0" + model);
             character = model;
         }
         //character = createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
         //createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
         // addMeText(0.03, 0.2) // old character
-        function addMeText(fontsize, x,y) {
+        let textLabel;
+        function addMeText(fontsize, x, y) {
             // add "Me" text to character?
             const loader = new THREE.FontLoader();
             let font;
@@ -420,8 +602,8 @@
                         height: 0.005, // Extrusion depth
                     });
                     const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
-                    const textLabel = new THREE.Mesh(textGeometry, textMaterial);
-                    textLabel.position.set(x, y, 0); // Adjust position as needed
+                    textLabel = new THREE.Mesh(textGeometry, textMaterial);
+                    textLabel.position.set(x, y, -1); // Adjust position as needed
                     textLabel.rotation.y = Math.PI;
                     //textLabel.rotation.z=Math.PI/2;
                     character.add(textLabel);
@@ -456,6 +638,32 @@
                 }
             }
         });
+
+
+        /*
+        controls = new THREE.PointerLockControls(camera, document.body);
+        scene.add(controls.getObject());
+        const pointerlockchange = () => {
+            if (document.pointerLockElement === document.body) {
+                controls.enabled = true;
+                blocker.style.display = 'none';
+            } else {
+                controls.enabled = false;
+                blocker.style.display = 'block';
+                instructions.style.display = '';
+            }
+        };
+
+        const pointerlockerror = () => {
+            //instructions.style.display = '';
+        };
+
+        document.addEventListener('pointerlockchange', pointerlockchange, false);
+        document.addEventListener('pointerlockerror', pointerlockerror, false);*/
+
+        /*const controls = new THREE.FirstPersonControls(camera);
+        controls.movementSpeed = 0.1;
+        controls.lookSpeed = 0.05;*/
 
         // Animation loop
         let moveDown = false;
@@ -515,21 +723,43 @@
             walkAction.play();
             mixer.update(0.01); // Update the animation
 
+            action_auction.timeScale = 1.0;
+            action_auction.play();
+            mixer_auction.update(0.01);
+
             // Update the camera's position to follow the character
             const distance = 0.6; // Distance between character and camera
             const angle = character.rotation.y; // Angle of rotation
             const xOffset = distance * Math.sin(angle);
-            const zOffset = 0.7 * Math.cos(angle);
-            camera.position.set(character.position.x - xOffset, camY, character.position.z - zOffset);
-            camera.lookAt(character.position);
+            firstPerson = true; // still off when turning
+            if (firstPerson) {
+                const zOffset = 0.01 * Math.cos(angle);
+                // camera add to character then no need to readjust
+                camera.position.y = 2;
+                camera.rotation.y = -Math.PI;
+                if (character) {
+                    character.add(camera);
+                }
+                //character.add(camera);//camera.position.set(character.position.x - xOffset, camY + 0.09, character.position.z - zOffset);
+                //camera.lookAt(character.position.x, character.position.y + 0.3, character.position.z);
+                textLabel.visible = false;
+            } else {
+                const zOffset = 0.7 * Math.cos(angle);
+                camera.position.set(character.position.x - xOffset, camY, character.position.z - zOffset);
+                camera.lookAt(character.position);
+                textLabel.visible = true;
+            }
             renderer.render(scene, camera);
-            positionInfo.innerText = (character.position.toArray());
+            //cssRenderer.render(scene, camera);
+            //controls.update();
+            positionInfo.innerText = (character.position.toArray() + ", ry: " + character.rotation.y);
         }
         animate();
     </script>
     <!-- somehow 4.1.1 will have revert error -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
     <script src="web3.js"></script>
+    <script src="indexHelper.js"></script>
 </body>
 
 </html>

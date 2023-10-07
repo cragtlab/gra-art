@@ -1,16 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />    
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />    
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />    
-    <title>GRA GTD Art Gallery</title>    
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>        
-  </body>
+<html>
+
+<head>
+  <title>Bid on Art Piece</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
+  <script src="web3.js"></script>
+</head>
+
+<body>
+  <div id="bidFun"></div>
+  <span id="live_auction">
+    <label for="bidAmount">Enter Bid: $</label>
+
+    <input type="number" id="bidAmount" min="0" step="1">
+    <button onclick="placeBid()">Place Bid</button>
+    <button onclick="placeBidHigher()">Place Higher Bid</button>
+  </span>
+  <span id="ended_auction">
+    <button onclick="payAuction()">Pay For Auction</button>
+  </span>
+  <div id="bidHistory"></div>
+
+  <script>
+    let lastBidAmount = 0; // to create excitement if bidded and outbid
+    let timeToAnnounce = false;
+    let highestBidAmount = 0;
+    let lastBidAnnouncement = "0";
+    // Announce the current bid every X seconds if text-to-speech is enabled
+    textToSpeechInterval = setInterval(() => {
+      timeToAnnounce = true;
+    }, 10000);
+
+    setInterval(async function () { // should listen event instead
+      const bidHistoryElement = document.getElementById('bidHistory');
+      details = await getAuctionDetails();
+      highestBidAmount = 0;
+      highestBidder = "0x";
+      bids = details[2];
+      timeRemaining = details[1] * 1000 - new Date().getTime();
+      if (bids.length) {
+        highestBidAmount = bids[bids.length - 1].amount;
+        highestBidder = bids[bids.length - 1].bidder;
+      }
+      for (bid of bids) {
+        if (bid.bidder == accounts[0]) {
+          lastBidAmount = bid.amount;
+        }
+      }
+
+      // display based on whether auction ongoing
+      if (details[0] == "0") {
+        live_auction.style.display = 'none';
+        ended_auction.style.display = 'none';
+        out = "No Auction Currently. Please wait for next auction";
+      } else {
+        if (timeRemaining > 0) {
+          live_auction.style.display = '';
+          ended_auction.style.display = 'none';
+          minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+          seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+          out = "Current Highest Bid: " + highestBidAmount;
+          out += "<br/>Auction Ends in " + minutes + "m " + seconds + "s";
+          out += "<br/>";
+          for (bid of bids) {
+            out += "<br/>" + bid.bidder + " bidded for " + bid.amount;
+          }
+        } else {
+          live_auction.style.display = 'none';
+          // show pay auction method if winning bidder
+          if (accounts[0] == highestBidder) {
+            out = "Congratulations. Auction ended with your winning bid of " + highestBidAmount;
+            ended_auction.style.display = '';
+          } else {
+            out = "Bidded ended with highest bid: " + highestBidAmount;
+            ended_auction.style.display = 'none';
+          }
+        }
+      }
+
+      bidHistoryElement.innerHTML = out;
+      if (lastBidAmount) {
+        if (highestBidAmount == lastBidAmount) {
+          bidFun.innerHTML = `<font color='green'>You are the highest bidder at ${lastBidAmount}</font>`;
+        } else {
+          bidFun.innerHTML = `<font color='red'>Your bid of $${lastBidAmount} was outbidded</font>`;
+        }
+      }
+
+      if (timeToAnnounce) {
+        timeToAnnounce = false;
+        if (bidHistoryElement.innerHTML.split("<br>")[0] === lastBidAnnouncement && lastBidAnnouncement.indexOf("ended") == -1) {
+          speakEncouragement();
+        } else if(bidHistoryElement.innerHTML.split("<br>")[0] != lastBidAnnouncement){
+          lastBidAnnouncement = bidHistoryElement.innerHTML.split("<br>")[0];
+          speak(lastBidAnnouncement);
+        }
+
+      }
+    }, 100);
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.5;
+      window.speechSynthesis.speak(utterance);
+    }
+    function speakEncouragement() {
+      const encouragementMessages = [
+        "Bidding is still open! Place your bid now and be part of the excitement.",
+        "Don't miss out! Place your bid and own this amazing art piece.",
+        "Join the bidding frenzy! Your bid could be the winning bid. Place it now!",
+        "The bidding is hot! Add your bid to the competition and secure this art piece.",
+        "Make your mark on this artwork by placing your bid now!",
+        "Keep the bids coming! Your bid might be the one that makes a difference.",
+        "The auction is in full swing. Place a bid and make a statement with this art piece.",
+        "Your bid can make a difference! Don't hesitate, bid now and show your interest in this artwork.",
+        "Unleash your competitive spirit! Place your bid and challenge others.",
+        "Bidding is a thrill! Join the action by placing your bid and aim for the top."
+      ];
+      const randomIndex = Math.floor(Math.random() * encouragementMessages.length);
+      speak(encouragementMessages[randomIndex]);
+    }
+
+    function placeBid() {
+      const bidAmount = parseInt(document.getElementById('bidAmount').value);
+      if (!isNaN(bidAmount)) {
+        addBid(bidAmount);
+        document.getElementById('bidAmount').value = "";
+      }
+    }
+    function placeBidHigher() {
+      document.getElementById('bidAmount').value = (highestBidAmount + 1);
+      placeBid();
+    }
+
+  </script>
+</body>
+
 </html>

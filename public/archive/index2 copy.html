@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Bid on Art Piece</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Art Piece Bidding</h1>
+  <!--<img src="assets/1.png" style="padding:10px" align="left" height="320">-->
+  <div id="bidFun"></div>
+  <label for="bidAmount">Enter your bid amount: $</label>
+  <input type="number" id="bidAmount" min="0" step="1">
+  <button onclick="placeBid()">Place Bid</button>
+  <button onclick="placeBidHigher()">Place Higher Bid</button>
+  <div id="bidHistory"></div>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8081');
+
+    let currentBidAmount = -1;
+    let lastBidAmount = 0; // to create excitement if bidded and outbid
+    let timeToAnnounce = false;
+    let lastBidAnnouncement = "0";
+    // Announce the current bid every X seconds if text-to-speech is enabled
+    textToSpeechInterval = setInterval(() => {
+      timeToAnnounce = true;
+    }, 10000);
+
+    ws.onmessage = (event) => {
+      const bidHistoryElement = document.getElementById('bidHistory');
+      bidHistoryElement.innerHTML = event.data.replaceAll("\n", "<br/>");
+      currentBidAmount = parseInt(bidHistoryElement.innerHTML.split("<br>")[0].split(" ")[3].replaceAll("$", ""));
+      if (lastBidAmount) {
+        if (!isNaN(currentBidAmount) && currentBidAmount == lastBidAmount) {
+          bidFun.innerHTML = `<font color='green'>You are currently the highest bidder at $${lastBidAmount}</font>`;
+        } else {
+          bidFun.innerHTML = `<font color='red'>Your bid of $${lastBidAmount} was outbidded</font>`;
+        }
+      }
+
+      if (timeToAnnounce) {
+        timeToAnnounce = false;
+        if (bidHistoryElement.innerHTML.split("<br>")[0] === lastBidAnnouncement && lastBidAnnouncement.indexOf("ended") == -1) {
+          speakEncouragement();
+        } else {
+          lastBidAnnouncement = bidHistoryElement.innerHTML.split("<br>")[0];
+          speak(lastBidAnnouncement);
+        }
+
+      }
+    };
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.5;
+      window.speechSynthesis.speak(utterance);
+    }
+    function speakEncouragement() {
+      const encouragementMessages = [
+        "Bidding is still open! Place your bid now and be part of the excitement.",
+        "Don't miss out! Place your bid and own this amazing art piece.",
+        "Join the bidding frenzy! Your bid could be the winning bid. Place it now!",
+        "The bidding is hot! Add your bid to the competition and secure this art piece.",
+        "Make your mark on this artwork by placing your bid now!",
+        "Keep the bids coming! Your bid might be the one that makes a difference.",
+        "The auction is in full swing. Place a bid and make a statement with this art piece.",
+        "Your bid can make a difference! Don't hesitate, bid now and show your interest in this artwork.",
+        "Unleash your competitive spirit! Place your bid and challenge others.",
+        "Bidding is a thrill! Join the action by placing your bid and aim for the top."
+      ];
+      const randomIndex = Math.floor(Math.random() * encouragementMessages.length);
+      speak(encouragementMessages[randomIndex]);
+    }
+
+    function placeBid() {
+      const bidAmount = parseInt(document.getElementById('bidAmount').value);
+      if (!isNaN(bidAmount)) {
+        lastBidAmount = bidAmount;
+        ws.send(bidAmount.toString());
+        document.getElementById('bidAmount').value = "";
+      }
+    }
+    function placeBidHigher() {
+      document.getElementById('bidAmount').value = (currentBidAmount + 1);
+      placeBid();
+    }
+
+  </script>
+</body>
+
+</html>
