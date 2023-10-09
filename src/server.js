@@ -33,6 +33,10 @@ server.on('connection', (client) => {
         });
 
     } else if (messageType === "position") {
+      if (!data || !data.sender) {
+        console.log("why got empty sender position?" + data + "//" + data.sender);
+        return;
+      }
       positions[data.sender.toLowerCase()] = {
         geoChoice: data.geoChoice,
         colorChoice: data.colorChoice,

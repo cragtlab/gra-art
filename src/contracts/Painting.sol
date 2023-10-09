@@ -27,6 +27,12 @@ contract Painting is ERC721 {
     Bid[] public bids;
     uint auction_expiry_date;
 
+    struct Name {
+        string name;
+        address wallet_address;
+    }
+    Name[] public names;
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -42,6 +48,8 @@ contract Painting is ERC721 {
         addPainting("Speed Up", creator, 0);
         addPainting("Lucky", creator, 0);
 
+        addName(address(0x20711d3dB1A31e59AF1DD70b8b613E048B0544E1), "Van GRA");
+
         /*
         paintings[0].owner=address(0xB793eca1c417B001fa2b82cc35f8488124C54F0e);
         paintings[0].list_price=-1; 
@@ -55,19 +63,38 @@ contract Painting is ERC721 {
             "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
     }
 
-    function addPainting(
-        string memory _name,
-        address creator,
-        int256 list_price
-    ) public {
-        require(msg.sender == contract_owner);
-        paintings.push(Paint(_name, address(0x0), creator, list_price));
+    /* name related */
+    function addName(address walletAddress, string memory name) public {
+        // self update or contract owner update
+        require(
+            msg.sender == walletAddress || msg.sender == contract_owner,
+            "Permission denied"
+        );
+        bool found = false;
+        for (uint256 i = 0; i < names.length; i++) {
+            if (names[i].wallet_address == walletAddress) {
+                names[i].name = name;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            names.push(Name(name, walletAddress));
+        }
     }
 
+    function getNames() public view returns (Name[] memory) {
+        return names;
+    }
+
+    /* end name related */
+
+    /* auction related  */
     function addBid(uint256 amount) public {
         require(auction_painting_id > 0); // ongoing auction
         require(auction_expiry_date >= block.timestamp); // not expired
-        if(bids.length > 0){
+        if (bids.length > 0) {
             require(amount > bids[bids.length - 1].amount);
         }
         if (auction_expiry_date - block.timestamp < 3 minutes) {
@@ -77,13 +104,14 @@ contract Painting is ERC721 {
         bids.push(Bid(amount, payable(msg.sender)));
     }
 
-    function getAuctionPaintingID () public view returns (uint256){
+    function getAuctionPaintingID() public view returns (uint256) {
         return auction_painting_id;
     }
 
     function getAuctionExpiryDate() public view returns (uint) {
         return auction_expiry_date;
     }
+
     function getBids() public view returns (Bid[] memory) {
         return bids;
     }
@@ -102,15 +130,26 @@ contract Painting is ERC721 {
         require(msg.sender == highestBid.bidder);
         require(msg.value >= highestBid.amount);
         // to refactor out since also in buyToken?
-        Paint memory auction = paintings[auction_painting_id-1];
+        Paint memory auction = paintings[auction_painting_id - 1];
         _transfer(auction.owner, msg.sender, auction_painting_id); // transfer token
         address payable _owner = payable(auction.owner);
         _owner.transfer(msg.value); // pay money to seller
-        // somehow painting owner and list price  didn't update when use auction variable instead 
-        paintings[auction_painting_id-1].owner = msg.sender; // change ownership after all done. must be after transfer
-        paintings[auction_painting_id-1].list_price = 0;
+        // somehow painting owner and list price  didn't update when use auction variable instead
+        paintings[auction_painting_id - 1].owner = msg.sender; // change ownership after all done. must be after transfer
+        paintings[auction_painting_id - 1].list_price = 0;
         auction_painting_id = 0; //reset token
         return true;
+    }
+
+    /* end auction related */
+
+    function addPainting(
+        string memory _name,
+        address creator,
+        int256 list_price
+    ) public {
+        require(msg.sender == contract_owner);
+        paintings.push(Paint(_name, address(0x0), creator, list_price));
     }
 
     function mint(uint256 _id) public payable {

@@ -42,8 +42,8 @@ socket.addEventListener('message', (event) => {
             }
         }
     } else if (message.type === "dm_messages") {
-        if (!accounts[0]) { 
-            return; 
+        if (!accounts[0]) {
+            return;
         }
         //console.log("processing dm wih "+ accounts[0]);
         if (direct_messages.length != message.data.length) {
@@ -54,9 +54,9 @@ socket.addEventListener('message', (event) => {
                 //console.log("process new DM: ");
                 //console.log(msg);
 
-                if (msg.to === accounts[0].toLowerCase()){
+                if (msg.to === accounts[0].toLowerCase()) {
                     showTab(msg.from);
-                }else if(msg.from === accounts[0].toLowerCase()) {
+                } else if (msg.from === accounts[0].toLowerCase()) {
                     showTab(msg.to);
                 }
             }
@@ -92,4 +92,8 @@ function sendMyPosition() {
 }
 sendPosInterval = setInterval(function () { sendMyPosition() }, 100);
 setInterval(function () { renderPlayerPositions() }, 100);
-setInterval(function () { showWhoIsOnline() }, 5000);
+setInterval(function () {
+    showWhoIsOnline();
+     refreshData(); // so auction updated?
+    // getNames() 
+}, 15000);

@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "start2": "node src/server2.js",
+    "old_start2": "node src/server2.js",
     "web": "npx live-server --open=public/",
     "ganache" : "npx ganache-cli --port 7545",
     "verify": "npx truffle run verify Painting --network matic --debug",
