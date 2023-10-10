@@ -178,7 +178,7 @@
         }
         function renderPlayerPositions() {
             //clearExistingPlayers();
-            fakePlayers = 3;
+            fakePlayers = 1;
 
             old = false;
             if (old) {
@@ -262,7 +262,7 @@
         // Create a maze matrix (4 for auction painting center (will span 3 space width?), 3 for painting hung on wall on top, 2 for painting hung below wall,1s represent walls, 0s represent empty spaces)
         const mazeMatrix = [
             [1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 1],
+            [1, 3, 3, 3, 3, 3, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -274,7 +274,7 @@
         ];
         const level2Matrix = [
             [1, 1, 1, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 1],
+            [1, 3, 3, 0, 3, 3, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -313,6 +313,7 @@
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
                     paintings.push(painting);
                     painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
+                    painting.rotation.y=-Math.PI
                     scene.add(painting);
                 } else if (mazeMatrix[row][col] === 4) {
                     const paintingGeometry = new THREE.PlaneGeometry(2, 2); // Adjust size as needed
@@ -354,6 +355,8 @@
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
                     paintings.push(painting);
                     painting.position.set(col - level2Matrix.length / 2, level_2_start * 1.5 - 0.6, row - level2Matrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
+                    painting.rotation.y=-Math.PI
+                    
                     scene.add(painting);
                 }
             }
