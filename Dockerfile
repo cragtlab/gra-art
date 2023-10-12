@@ -7,5 +7,5 @@ RUN npm install --force
 #EXPOSE 5500
 # RUN chown -R node /usr/src/app
 # USER node
-RUN npm run web
+RUN npx vite --port 80 --host --base /public/
 #CMD ["npm", "run web"]
