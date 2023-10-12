@@ -7,5 +7,5 @@ RUN npm install --force
 #EXPOSE 5500
 # RUN chown -R node /usr/src/app
 # USER node
-npm run web
+RUN npm run web
 #CMD ["npm", "run web"]
