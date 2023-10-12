@@ -65,10 +65,15 @@
             font-size: 28px;
         }
 
-        #connectBtn {
+        #connectDiv {
             position: absolute;
             right: 30px;
             padding: 15px;
+
+        }
+
+        #connectBtn,
+        #changeNameBtn {
             background: #1D8482;
             color: #E0F1FF;
         }
@@ -78,7 +83,11 @@
 
 <body>
     <!-- Add a button to switch between levels -->
-    <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
+    <div id="connectDiv">
+        <w3m-core-button></w3m-core-button>
+        <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
+        <button id="changeNameBtn" style="display:none" onclick="changeName()">Change Name</button>
+    </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
     <div id='paintingInfo'></div>
@@ -311,9 +320,9 @@
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
-                    paintings.push(painting);
+                    paintings.splice(0, 0, painting);
                     painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
-                    painting.rotation.y=-Math.PI
+                    painting.rotation.y = -Math.PI
                     scene.add(painting);
                 } else if (mazeMatrix[row][col] === 4) {
                     const paintingGeometry = new THREE.PlaneGeometry(2, 2); // Adjust size as needed
@@ -353,10 +362,10 @@
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
-                    paintings.push(painting);
+                    paintings.splice(0, 0, painting);
                     painting.position.set(col - level2Matrix.length / 2, level_2_start * 1.5 - 0.6, row - level2Matrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
-                    painting.rotation.y=-Math.PI
-                    
+                    painting.rotation.y = -Math.PI
+
                     scene.add(painting);
                 }
             }
@@ -545,12 +554,12 @@
             return extra;
         }
 
-        character_choices = ["1","3"] //["0", "1"]// "3"];
+        character_choices = ["1", "3"] //["0", "1"]// "3"];
         const glbLoader2 = new THREE.GLTFLoader();
         for (i = 0; i < 7; i++) {
             const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
             const inFile = 'assets/' + character_choices[choice] + '.glb'
-            console.log('choice is ' + choice);
+            //console.log('choice is ' + choice);
             glbLoader2.load(inFile, (gltf) => {
                 otherCharacter = gltf.scene;
                 otherCharacters.push(otherCharacter);
@@ -728,11 +737,11 @@
                 instructions.style.display = '';
             }
         };
-
+ 
         const pointerlockerror = () => {
             //instructions.style.display = '';
         };
-
+ 
         document.addEventListener('pointerlockchange', pointerlockchange, false);
         document.addEventListener('pointerlockerror', pointerlockerror, false);*/
 
@@ -840,12 +849,14 @@
             positionInfo.innerText = (character.position.toArray() + ", ry: " + character.rotation.y);
         }
         animate();
-        
+
     </script>
     <!-- somehow 4.1.1 will have revert error -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
     <script defer src="web3.js"></script>
     <script src="indexHelper.js"></script>
+    <script>const global = globalThis;</script>
+    <script type="module" src="main.js"></script>
 </body>
 
 </html>

@@ -48,17 +48,17 @@ contract Painting is ERC721 {
         addPainting("Speed Up", creator, 0);
         addPainting("Lucky", creator, 0);
 
-        addPainting("Life Is Good", creator, 0);
-        addPainting("Adventures Await", creator, 0);
-        addPainting("Journey On", creator, 0);
-        addPainting("Speed Up", creator, 0);
-        addPainting("Lucky", creator, 0);
+        addPainting("Maximum Throttle", creator, 0);
+        addPainting("MBS", creator, 0);
+        addPainting("Peekaboo", creator, 0);
+        addPainting("Golden Moments", creator, 0);
+        addPainting("Sunset", creator, 0);
 
-        addPainting("Life Is Good", creator, 0);
-        addPainting("Adventures Await", creator, 0);
-        addPainting("Journey On", creator, 0);
-        addPainting("Speed Up", creator, 0);
-        addPainting("Lucky", creator, 0);
+        addPainting("Blossoms", creator, 0);
+        addPainting("Darkness", creator, 0);
+        addPainting("Bright", creator, 0);
+        addPainting("Rainbow Tree", creator, 0);
+        addPainting("Relax", creator, 0);
 
         addName(address(0x20711d3dB1A31e59AF1DD70b8b613E048B0544E1), "Van GRA");
 

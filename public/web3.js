@@ -21,12 +21,11 @@ async function clickConnect() {
     contract = await new web3.eth.Contract(contractJSON.abi, paintingAddress);
 
     refreshData();
-
-    // for changing name
-    if (typeof(connectBtn) != 'undefined' && connectBtn.textContent.indexOf("change name") > 0) {
-        addName();
-    }
 }
+function changeName() {
+    addName();
+}
+
 async function refreshData() {
     web3Paintings = await contract.methods.getPaintings().call()
     web3Names = await getNames(); // store array into names[wallet_address] map
@@ -35,7 +34,8 @@ async function refreshData() {
 
     // for index.html only, not index2.html
     if (typeof (loadAuctionPainting) != 'undefined') {
-        connectBtn.textContent = getNiceName(accounts[0]) + " (change name?)";
+        connectBtn.textContent = getNiceName(accounts[0]);
+        changeNameBtn.style.display = '';
         loadAuctionPainting(await getAuctionPaintingID());
     }
 }
@@ -110,4 +110,4 @@ async function buyPainting(id) {
 async function getPainting(id) {
     return web3Paintings[id];
 }
-setTimeout(()=>{clickConnect();}, 5000); // connect at start after things loadup?
+setTimeout(() => { clickConnect(); }, 5000); // connect at start after things loadup?
