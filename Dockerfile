@@ -1,9 +1,10 @@
-bashCopy code
-# Use the official Node.js image as the base image
-FROM node:18
- 
-# Install the application dependencies
+FROM node:lts-alpine
+ENV NODE_ENV=production
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
 RUN npm install --force
-
-# Define the entry point for the container
+# mv node_modules ../
+# COPY . .
+EXPOSE 5500
+# RUN chown -R node /usr/src/app
+# USER node
 CMD ["npm", "run web"]
