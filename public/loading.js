@@ -1,10 +1,33 @@
 /*
 
- #loadingDiv {
-	position:absolute;
-            background: beige;
-
+  #container {
+            position: relative;
+            
+            transition: opacity 2s;
         }
+
+        #container canvas,
+        #overlay {
+            background: beige;
+            position: absolute;
+            align-items: center;
+            justify-content: center;
+        }
+ 
+         <div id="container">
+        <canvas id="loadingCanvas"></canvas>
+        <div id="overlay">
+            
+            <h2>Scan To Join The MetaVerse (Limited to 30 pax)</h2>
+            <img width="320" height="320" align="left" />
+            <h2>Enter as Explorer or Web3 Wallet User</h2>
+            <input placeholder="Enter Name" style="width: 30%"><button onclick="loaded=true;chooseCharacter=true" style="width: 30%">Explore</button>
+            <br/><b>OR</b>
+            <br/><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
+        </div>
+    </div>
+
+
 
 <script src="loading.js"></script>
 	
@@ -15,7 +38,7 @@
                 return;
             }
 */
-let loaded = false, finalLoading = false;
+let loaded = false, chooseCharacter=false;
 xxx(); function xxx() {
     const canvas = document.getElementById('loadingCanvas');
     const ctx = canvas.getContext('2d');
@@ -105,6 +128,13 @@ xxx(); function xxx() {
     // Game loop
     function gameLoop() {
 
+        if (loaded) {
+            container.style.opacity=0;
+            return;
+        }
+        if(chooseCharacter){
+
+        }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -123,26 +153,7 @@ xxx(); function xxx() {
         }
 
         requestAnimationFrame(gameLoop);
-        if (loaded && !finalLoading) {
-            finalLoading = true;
-            loadingDiv.style.opacity=100;
-            loadingCanvas.style.opacity=100;
-            loadingCanvas.style.display = '';
-            loadingDiv.style.display = '';
-            
-            return;
-        }
-        if (finalLoading) {
-
-            if (loadingDiv.style.opacity > 0) {
-                loadingDiv.style.opacity -= 1;
-                loadingCanvas.style.opacity -= 1;
-            } else {
-                loadingCanvas.style.display = 'none';
-                loadingDiv.style.display = 'none';
-            }
-        }
-
+        
     }
 
     for (i = 0; i < 10; i++) {
