@@ -14,31 +14,29 @@
             justify-content: center;
         }
  
-         <div id="container">
+        <div id="container">
         <canvas id="loadingCanvas"></canvas>
-        <div id="overlay">
-            
+        <div id="overlay">   
             <h2>Scan To Join The MetaVerse (Limited to 30 pax)</h2>
             <img width="320" height="320" align="left" />
-            <h2>Enter as Explorer or Web3 Wallet User</h2>
-            <input placeholder="Enter Name" style="width: 30%"><button onclick="loaded=true;chooseCharacter=true" style="width: 30%">Explore</button>
+            <h2>Explorer or Web3 Wallet User?</h2>
+            <button onclick="var name=prompt('Enter Name');if(name){loaded=true;}" style="width: 30%">Explore</button>
             <br/><b>OR</b>
             <br/><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
         </div>
     </div>
 
 
-
 <script src="loading.js"></script>
 	
-	till 5,6
+    till 5,6
 ...
  requestAnimationFrame(animate);
             if (!loaded) {
                 return;
             }
 */
-let loaded = false, chooseCharacter=false;
+let loaded = false, chooseCharacter = false;
 xxx(); function xxx() {
     const canvas = document.getElementById('loadingCanvas');
     const ctx = canvas.getContext('2d');
@@ -127,12 +125,15 @@ xxx(); function xxx() {
 
     // Game loop
     function gameLoop() {
-
+        if(typeof(accounts) != 'undefined' && accounts[0]){
+            loaded=true;
+            //alert("yeah" + accounts[0]);
+        }
         if (loaded) {
-            container.style.opacity=0;
+            container.style.opacity = 0;
             return;
         }
-        if(chooseCharacter){
+        if (chooseCharacter) {
 
         }
 
@@ -153,7 +154,7 @@ xxx(); function xxx() {
         }
 
         requestAnimationFrame(gameLoop);
-        
+
     }
 
     for (i = 0; i < 10; i++) {

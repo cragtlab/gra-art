@@ -16,12 +16,11 @@
  
          <div id="container">
         <canvas id="loadingCanvas"></canvas>
-        <div id="overlay">
-            
+        <div id="overlay">   
             <h2>Scan To Join The MetaVerse (Limited to 30 pax)</h2>
             <img width="320" height="320" align="left" />
-            <h2>Enter as Explorer or Web3 Wallet User</h2>
-            <input placeholder="Enter Name" style="width: 30%"><button onclick="loaded=true;chooseCharacter=true" style="width: 30%">Explore</button>
+            <h2>Explorer or Web3 Wallet User?</h2>
+            <button onclick="var name=prompt('Enter Name');if(name){loaded=true;}" style="width: 30%">Explore</button>
             <br/><b>OR</b>
             <br/><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
         </div>
@@ -40,6 +39,9 @@
 */
 let loaded = false, chooseCharacter = false;
 xxx(); function xxx() {
+    document.getElementById("overlay").style.background = 'black';
+    document.getElementById("container").style.color = 'white';
+
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
     scene.add(camera);
@@ -117,6 +119,14 @@ xxx(); function xxx() {
 
     //Render loop
     var render = function () {
+        if(accounts && accounts[0]){
+            loaded=true;
+            alert("yeah");
+        }
+        if (loaded) {
+            container.style.opacity = 0;
+            return;
+        }
         earth.rotation.y += .0009;
         clouds.rotation.y += .00005;
 
