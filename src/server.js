@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const server = new WebSocket.Server({ port: 8080 });
 const clients = new Set();
+const client2positions = {};
 const positions = {};
 const direct_messages = [];
 server.on('connection', (client) => {
@@ -28,6 +29,12 @@ server.on('connection', (client) => {
     } else if (messageType === "dm") {
       toAddr = data.to.toLowerCase();
 
+      var kick="!kick"; // kick code for convenience
+      if(data.msg === kick){
+        console.log("kick code detected for " + toAddr);
+        delete positions[toAddr];
+      }
+
       direct_messages.push(
         {
           from: data.sender.toLowerCase(),
@@ -35,11 +42,14 @@ server.on('connection', (client) => {
           msg: data.msg
         });
 
+
+
     } else if (messageType === "position") {
       if (!data || !data.sender) {
         console.log("why got empty sender position?" + data + "//" + data.sender);
         return;
       }
+      client2positions[client]=data.sender.toLowerCase(); // store to remove at disconnect
       positions[data.sender.toLowerCase()] = {
         geoChoice: data.geoChoice,
         colorChoice: data.colorChoice,
@@ -54,7 +64,7 @@ server.on('connection', (client) => {
   client.on('close', () => {
     console.log('Client disconnected');
     clients.delete(client);
-    delete positions[client];
+    delete positions[client2positions[client]];
     console.log('size is ' + clients.size);
   });
 });

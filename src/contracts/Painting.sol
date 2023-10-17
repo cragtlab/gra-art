@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // 1-to-1 NFT
+import "@openzeppelin/contracts/token/common/ERC2981.sol"; // royalty 
 
-contract Painting is ERC721 {
+contract Painting is ERC721, ERC721Royalty {
     uint256 public cost = 0.001 ether; // mint price, will reject if below
     uint256 public maxSupply = 20;
     uint256 public totalSupply = 0;
@@ -46,7 +47,7 @@ contract Painting is ERC721 {
         addPainting("Adventures Await", creator, 0);
         addPainting("Journey On", creator, 0);
         addPainting("Speed Up", creator, 0);
-        addPainting("Lucky", creator, 0);
+        addPainting("Fast Train", address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), 0);
 
         addPainting("Maximum Throttle", creator, 0);
         addPainting("MBS", creator, 0);
@@ -55,7 +56,7 @@ contract Painting is ERC721 {
         addPainting("Sunset", creator, 0);
 
         addPainting("Blossoms", creator, 0);
-        addPainting("Darkness", creator, 0);
+        addPainting("Darkness", address(0x3A3593B8e169236289Cf8699876A8Af393B02230), 0);
         addPainting("Bright", creator, 0);
         addPainting("Rainbow Tree", creator, 0);
         addPainting("Relax", creator, 0);

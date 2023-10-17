@@ -35,21 +35,26 @@
 
         #chatbox {
             background-color: rgba(255, 255, 255, 0.9);
-            position: absolute;
-            bottom: 10px;
-            padding: 10px;
-            left: 10px;
+            margin: 10px;
+            /* padding: 10px;*/
             font-family: Helvetica Neue Light;
             font-size: 18px;
         }
 
+        #chatbox_div {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+        }
+
         .chatarea {
-            background-color: rgba(255, 255, 255, 0.9);
             position: absolute;
             bottom: 85px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 10px;
             overflow: auto;
-            left: 10px;
             height: 200px;
             font-family: Helvetica Neue Light;
             font-size: 18px;
@@ -93,11 +98,90 @@
             /*bottom: 200px; must substract from this as now using midpoint*/
             pointer-events: none;
         }
+
+        @media (min-width: 768px) {
+            #circle-overlay {
+                display: none;
+            }
+        }
+
+        #container {
+            position: relative;
+            transition: opacity 2s;
+        }
+
+        #container canvas,
+        #overlay {
+            background: beige;
+            position: absolute;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* emoji scrolling */
+        .emoji-container {
+            display: flex;
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin: 10px;
+        }
+
+        .marquee-container {
+            z-index: 9999;
+            position: absolute;
+            width: 100%;
+        }
+
+        #marquee-row1 {
+            top: 50px;
+        }
+
+        #marquee-row2 {
+            top: 80px;
+        }
+
+        #marquee-row3 {
+            top: 110px;
+        }
+
+        .marquee {
+            font-size: 24px;
+            white-space: nowrap;
+            overflow: hidden;
+            animation-duration: 10s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
     </style>
     </style>
 </head>
 
 <body>
+    <div id="container">
+        <canvas id="loadingCanvas"></canvas>
+        <div id="overlay">
+            <h2>Scan To Join The MetaVerse (Limited to 30 pax)</h2>
+            <img width="320" height="320" align="left" />
+            <h2>Explorer or Web3 Wallet User?</h2>
+            <button onclick="unregistered_name=prompt('Enter Name');if(unregistered_name){loaded=true;}"
+                style="width: 30%">Explore</button>
+            <br /><b>OR</b>
+            <br /><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
+        </div>
+    </div>
     <div id="circle-overlay"></div>
     <div id="connectDiv">
         <w3m-core-button></w3m-core-button>
@@ -116,8 +200,21 @@
         <button class="tab-content" onclick="showTab()">World</button>
         <!-- <button class="tab-content" id="test" onclick="showTab(this.id)">0x23567</button>-->
     </div>
-    <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
+    <div id="marquee-row1" class="marquee-container"></div>
+    <div id="marquee-row2" class="marquee-container"></div>
+    <div id="marquee-row3" class="marquee-container"></div>
+
+    <div id="chatbox_div">
+        <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
+        <div class="emoji-container">
+            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">😊</button>
+            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">🎉</button>
+            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">❤️</button>
+            <!-- Add more emojis and their corresponding functions as needed -->
+        </div>
+    </div>
     <script src="three.min.js"></script>
+    <script src="loading.js"></script>
     <script src="GLTFLoader.js"></script>
 
     <!-- change r98 accordingly https://rawcdn.githack.com/mrdoob/three.js/r98/examples/index.html -->
@@ -146,7 +243,13 @@
             console.log(toAddr + "// addMessage " + sender + " msg " + msg);
             // if DM to others, just wait for it to return
             if (!toAddr) {
-                chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+                if ("😊🎉❤️".indexOf(msg) >= 0) {
+                    // process emoji 
+                    console.log("processing emoji from " + sender + ": " + msg)
+                    startMarquee(getNiceName(sender) + ": " + msg);
+                } else {
+                    chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+                }
             }
         }
         function showWhoIsOnline() {
@@ -187,9 +290,9 @@
                 chatarea_direct.innerHTML = "";
                 for (msg of direct_messages) {
 
-                    if (msg.to === accounts[0].toLowerCase() && msg.from === otherAddr.toLowerCase()) {
+                    if ((msg.to) && msg.from === otherAddr.toLowerCase()) {
                         chatarea_direct.innerHTML = "<b>" + getNiceName(msg.from) + ": </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
-                    } else if (msg.from === accounts[0].toLowerCase() && msg.to === otherAddr.toLowerCase()) {
+                    } else if (isMe(msg.from) && msg.to === otherAddr.toLowerCase()) {
                         chatarea_direct.innerHTML = "<b>Me: </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
                     }
                 }
@@ -208,8 +311,7 @@
         function renderPlayerPositions() {
             //clearExistingPlayers();
             fakePlayers = 0;
-
-            old = false;
+            old = false; // old code of rendering live. too slow?
             if (old) {
                 while (mesh = playerMeshs.pop()) {
                     scene.remove(mesh);
@@ -220,12 +322,18 @@
                     playerMeshs.push(createCharacter_shape(player.geoChoice, player.colorChoice, player.position, player.ry));
                 }
             } else {
+
                 i = 0;
                 for (player of playerPositions) {
+                    cModel = otherCharacters[fakePlayers + i];
+                    if (!cModel) {
+                        console.log("wait for cModel to load for index " + i)
+                        return;
+                    }
                     //console.log(player.position);
-                    otherCharacters[fakePlayers + i].position.set(player.position.x, player.position.y, player.position.z);
-                    otherCharacters[fakePlayers + i].rotation.y = player.ry; //Math.PI + player.ry for mesh[0];
-                    otherCharacters[fakePlayers + i].visible = true;
+                    cModel.position.set(player.position.x, player.position.y, player.position.z);
+                    cModel.rotation.y = player.ry; //Math.PI + player.ry for mesh[0];
+                    cModel.visible = true;
                     i++;
                     //console.log("rendering player" + otherCharacters[fakePlayers + i]);
                 }
@@ -255,7 +363,7 @@
         }
 
         const scene = new THREE.Scene();
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas") });
+        const renderer = new THREE.WebGLRenderer({ precision: 'mediump', canvas: document.getElementById("canvas") });
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         /*
@@ -576,7 +684,7 @@
             return extra;
         }
 
-        character_choices = ["1", "3"] //["0", "1"]// "3"];
+        character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
         const glbLoader2 = new THREE.GLTFLoader();
         for (i = 0; i < 7; i++) {
             const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
@@ -614,7 +722,7 @@
 
 
 
-        const light = new THREE.AmbientLight(0xffffff, 1);
+        const light = new THREE.AmbientLight(0xffffff, 2);
         scene.add(light);
 
         // load auctioner
@@ -745,6 +853,24 @@
             }
         });
 
+        // emoji marquee
+        let currentMarqueeRow = 1;
+        function startMarquee(emoji) {
+            const marquee = document.createElement('div');
+            marquee.classList.add('marquee');
+            marquee.classList.add('marquee-container');
+            marquee.textContent = emoji;
+            marquee.id = `marquee-row${currentMarqueeRow}`;
+            document.body.appendChild(marquee);
+            //document.querySelector(`#marquee-row${currentMarqueeRow}`).appendChild(marquee);
+
+            marquee.style.animation = 'marquee 10s linear ';
+            marquee.addEventListener('animationend', () => {
+                marquee.remove();
+            });
+            currentMarqueeRow = (currentMarqueeRow % 3) + 1;
+        }
+
         let rotateLeft, rotateRight, moveForward, moveBackward;
         const maxMovement = 0.001;  // Maximum movement distance from the center of the circle
         const maxRotation = 0.001;
@@ -754,6 +880,22 @@
         document.addEventListener('touchend', onTouchEnd);
         function onTouchStart(event) {
             //  event.preventDefault();
+            const touch = event.touches[0];
+
+            // Calculate touch movement distance from the center of the circle
+            const deltaX = touch.clientX - window.innerWidth / 2;
+            const deltaY = touch.clientY - window.innerHeight / 2;
+            const threshold = 120;
+            //console.log(deltaY)
+            if (deltaY < -threshold) {
+                moveForward = true;
+            } else if (deltaY > threshold) {
+                moveBackward = true;
+            } else if (deltaX < 0) {
+                rotateLeft = true;
+            } else {
+                rotateRight = true;
+            }
         }
 
         function onTouchEnd(event) {
@@ -762,8 +904,13 @@
             moveForward = false;
             moveBackward = false;
         }
-
         function onTouchMove(event) {
+            rotateLeft = false;
+            rotateRight = false;
+            moveForward = false;
+            moveBackward = false;
+        }
+        /*function onTouchMove(event) {
             //event.preventDefault();
             const touch = event.touches[0];
 
@@ -788,6 +935,12 @@
             //character.position.z -= movementYRatio * maxMovement;
             //console.log(maxMovement)
             //console.log(movementYRatio);
+        }*/
+        window.addEventListener('resize', onWindowResize);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
 
@@ -797,7 +950,9 @@
         let level1_y = 0.06  // 0.16 for createCharacter1
         function animate() {
             requestAnimationFrame(animate);
-
+            if (!loaded) {
+                return;
+            }
             if (!character) return;
 
             if (moveY) { // moving up/down lift

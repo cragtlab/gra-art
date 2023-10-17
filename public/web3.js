@@ -41,12 +41,24 @@ async function refreshData() {
 }
 
 function getNiceName(walletAddress) {
+    if(!web3Names){
+        console.log("what is this");
+        if (walletAddress.length > 5) {
+            return walletAddress.substring(0, 5) + "..";
+        }
+        return walletAddress; // somehow happen at init
+    }
     for (lookup of web3Names) {
         if (lookup.wallet_address.toLowerCase() === walletAddress.toLowerCase()) {
             return lookup.name;
         }
     }
-    return walletAddress.substring(0, 5) + "..";
+
+    // real wallet address instead of explorer
+    if (walletAddress.length > 5) {
+        return walletAddress.substring(0, 5) + "..";
+    }
+    return walletAddress;
 }
 async function getNames() {
     return await contract.methods.getNames().call();
