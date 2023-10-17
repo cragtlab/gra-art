@@ -1,23 +1,52 @@
 
-const socket = new WebSocket('ws://localhost:8080');
-socket.addEventListener('open', (event) => {
-    console.log('Connected to WebSocket server');
-});
+let socket;
 
+connect();
+function connect() {
+    socket = new WebSocket('ws://' + location.hostname + ':8080');
+    socket.addEventListener('open', (event) => {
+        console.log('Connected to WebSocket server');
+    });
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setTimeout(() => {
+            console.log('Attempting to reconnect in 5s...');
+            connect();
+        }, 5000);
+    };
+}
+
+socket.onerror = (error) => {
+    console.error('WebSocket error:', error);
+    setTimeout(() => {
+        console.log('Attempting to reconnect in 5s...');
+        socket = new WebSocket('ws://' + location.hostname + ':8080');
+    }, 5000);
+};
+socket.addEventListener('close', (event) => {
+    console.log('Disconnected from WebSocket server will reconnect');
+    //clearInterval(sendPosInterval);
+    setTimeout(() => {
+        console.log('Attempting to reconnect in 5s...');
+        socket = new WebSocket('ws://' + location.hostname + ':8080');
+    }, 5000);
+});
 socket.addEventListener('message', (event) => {
     if (!accounts) {
-        clickConnect();
+        //clickConnect();
         return;
     }
     if (accounts.length == 0) {
         alert("No Address? Connect first!");
         return;
     }
-    //console.log("received message: ");
-    //console.log(event);
+    //console.log("event.data is");
+    //console.log(event.data);
     message = JSON.parse(event.data);
-    //console.log("received message " + message);
+
     if (message.type === "msg") {
+        //console.log("received message ");
+        //console.log(message);
         if (message.sender === (accounts[0].toLowerCase())) {
             console.log('ignore msg from self');
         } else {
@@ -67,13 +96,22 @@ socket.addEventListener('message', (event) => {
     //console.log(playerPositions);        
 });
 
-socket.addEventListener('close', (event) => {
-    console.log('Disconnected from WebSocket server');
-    clearInterval(sendPosInterval);
-});
 
+let unregistered_name;
 function sendMessage(msg) {
     //console.log(toAddr+ " //// "+msg); 
+    if (!accounts) {
+        if (!unregistered_name) {
+            unregistered_name = prompt("Choose your name (Note you need to connect wallet to particpate in auction and send/receive direct message");
+            chatarea.innerHTML = "<b>System: </b> Note you need to connect wallet (top right) to particpate in auction and send/receive direct message<br/>" + chatarea.innerHTML;
+            //unregistered_name += ""; // maybe add some random hash so will be unique rather than server do
+        }
+        if (unregistered_name) {
+            socket.send(JSON.stringify({ type: 'msg', sender: unregistered_name, msg: msg }));
+        }
+        return;
+    }
+
     if (toAddr) {
         socket.send(JSON.stringify({ type: 'dm', sender: accounts[0], to: toAddr, msg: msg }));
     } else {
@@ -81,7 +119,16 @@ function sendMessage(msg) {
     }
 }
 function sendMyPosition() {
-    if (!character || !accounts) {
+    // send when character out and player connected (reg or unregistered)
+    if (!character || (!accounts && !unregistered_name)) {
+        return;
+    }
+
+    if (unregistered_name) {
+        socket.send(JSON.stringify({
+            type: 'position', sender: unregistered_name,
+            geoChoice: geoChoice, colorChoice: colorChoice, position: character.position, ry: character.rotation.y
+        }));
         return;
     }
     //console.log("send pos:"+geoChoice+","+colorChoice+","+character.position+","+character.rotation.y)
@@ -94,6 +141,6 @@ sendPosInterval = setInterval(function () { sendMyPosition() }, 100);
 setInterval(function () { renderPlayerPositions() }, 100);
 setInterval(function () {
     showWhoIsOnline();
-     refreshData(); // so auction updated?
+    refreshData(); // so auction updated?
     // getNames() 
 }, 15000);

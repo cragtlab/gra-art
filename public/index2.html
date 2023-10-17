@@ -69,7 +69,7 @@
           out += "<br/>Auction Ends in " + minutes + "m " + seconds + "s";
           out += "<br/>";
           for (bid of bids) {
-            out += "<br/>" + bid.bidder + " bidded for " + bid.amount;
+            out += "<br/>" + getNiceName(bid.bidder) + " bidded for " + bid.amount;
           }
         } else {
           live_auction.style.display = 'none';

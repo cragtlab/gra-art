@@ -40,7 +40,7 @@ contract Painting is ERC721 {
     ) ERC721(_name, _symbol) {
         _cost = cost;
         contract_owner = msg.sender; // security to restrict addPainting to only deployer
-        address creator = address(0x20711d3dB1A31e59AF1DD70b8b613E048B0544E1);
+        address creator = address(0x3A3593B8e169236289Cf8699876A8Af393B02230);
 
         addPainting("Life Is Good", creator, 0);
         addPainting("Adventures Await", creator, 0);
@@ -60,8 +60,10 @@ contract Painting is ERC721 {
         addPainting("Rainbow Tree", creator, 0);
         addPainting("Relax", creator, 0);
 
-        addName(address(0x20711d3dB1A31e59AF1DD70b8b613E048B0544E1), "Van GRA");
-
+        addName(address(0x3A3593B8e169236289Cf8699876A8Af393B02230), "Van GRA");
+        addName(address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), "lenovo");
+        addName(address(0x21586e20921f2d6C068830C9460c728c9a3411a2), "sm");
+        addName(address(0xCAAE7Ee609621f5B64d7553fdee4696B2a4Eb56F), "CC");
         /*
         paintings[0].owner=address(0xB793eca1c417B001fa2b82cc35f8488124C54F0e);
         paintings[0].list_price=-1; 
@@ -71,8 +73,8 @@ contract Painting is ERC721 {
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return
-            "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
+        return "ipfs://QmZYxeVLcXS3NmMkJXZLX88GmYc19fqNqCLSBZXDMvazWg/";
+        //"https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
     }
 
     /* name related */

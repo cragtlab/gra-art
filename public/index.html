@@ -1,3 +1,7 @@
+<!--
+    mobile can chat and move?
+    painting 10-15 cannot mint
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -77,12 +81,24 @@
             background: #1D8482;
             color: #E0F1FF;
         }
+
+        #circle-overlay {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            left: calc(50% - 50px);
+            top: calc(50% - 50px);
+            /*bottom: 200px; must substract from this as now using midpoint*/
+            pointer-events: none;
+        }
     </style>
     </style>
 </head>
 
 <body>
-    <!-- Add a button to switch between levels -->
+    <div id="circle-overlay"></div>
     <div id="connectDiv">
         <w3m-core-button></w3m-core-button>
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
@@ -117,13 +133,19 @@
         const playerMeshs = [];
         const fakePlayerMeshs = [];
 
+        chatbox.addEventListener('keydown', function (event) {
+            if (event.keyCode === 13) {
+                addMessage("Me", this.value); this.value = "";
+            }
+
+        });
         function addMessage(sender, msg) {
             if (sender == "Me") {
                 sendMessage(msg);
             }
+            console.log(toAddr + "// addMessage " + sender + " msg " + msg);
             // if DM to others, just wait for it to return
             if (!toAddr) {
-
                 chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
             }
         }
@@ -174,8 +196,6 @@
                 chatarea.style.display = 'none';
                 chatarea_direct.style.display = '';
 
-
-
                 chatbox.placeholder = "Messaging " + otherAddr;
             } else {
                 chatarea.style.display = '';
@@ -187,7 +207,7 @@
         }
         function renderPlayerPositions() {
             //clearExistingPlayers();
-            fakePlayers = 1;
+            fakePlayers = 0;
 
             old = false;
             if (old) {
@@ -282,8 +302,8 @@
             [1, 1, 1, 1, 1, 1, 1],
         ];
         const level2Matrix = [
-            [1, 1, 1, 0, 1, 1, 1],
-            [1, 3, 3, 0, 3, 3, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 3, 3, 3, 3, 3, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -320,7 +340,8 @@
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
-                    paintings.splice(0, 0, painting);
+                    //paintings.splice(0, 0, painting);
+                    paintings.push(painting);
                     painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
                     painting.rotation.y = -Math.PI
                     scene.add(painting);
@@ -362,7 +383,8 @@
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
-                    paintings.splice(0, 0, painting);
+                    //paintings.splice(0, 0, painting);
+                    paintings.push(painting);
                     painting.position.set(col - level2Matrix.length / 2, level_2_start * 1.5 - 0.6, row - level2Matrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
                     painting.rotation.y = -Math.PI
 
@@ -424,7 +446,7 @@
                 getPainting(clickedPaintingIndex).then((painting) => { // 0-based
                     paintingName.href = "https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id;
                     paintingName.textContent = "Painting #" + id + " (" + painting.name + ")";
-                    ownerHref.href = "https://testnets.opensea.io/" + painting.owner;
+                    ownerHref.setAttribute("onclick", "showTab('" + painting.owner + "');return false;"); //.href = "https://testnets.opensea.io/" + painting.owner;
                     button = document.querySelector("input[id='" + id + "']");
                     // message creator
                     creator.setAttribute("onclick", "showTab('" + painting.creator + "');return false;");
@@ -627,14 +649,14 @@
 
             });
             // add light as very dark
-            var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+            /*var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
             hemiLight.position.set(0, 10, 0);
-            scene.add(hemiLight);
+            scene.add(hemiLight);*/
 
-            // add light as very dark
+            /*// add light as very dark
             var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
             hemiLight.position.set(0, 10, 0);
-            scene.add(hemiLight);
+            scene.add(hemiLight);*/
 
             // Add the model to the scene
             model_auction.visible = false;
@@ -723,31 +745,51 @@
             }
         });
 
+        let rotateLeft, rotateRight, moveForward, moveBackward;
+        const maxMovement = 0.001;  // Maximum movement distance from the center of the circle
+        const maxRotation = 0.001;
+        // Attach touch event handlers
+        document.addEventListener('touchstart', onTouchStart);
+        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchend', onTouchEnd);
+        function onTouchStart(event) {
+            //  event.preventDefault();
+        }
 
-        /*
-        controls = new THREE.PointerLockControls(camera, document.body);
-        scene.add(controls.getObject());
-        const pointerlockchange = () => {
-            if (document.pointerLockElement === document.body) {
-                controls.enabled = true;
-                blocker.style.display = 'none';
+        function onTouchEnd(event) {
+            rotateLeft = false;
+            rotateRight = false;
+            moveForward = false;
+            moveBackward = false;
+        }
+
+        function onTouchMove(event) {
+            //event.preventDefault();
+            const touch = event.touches[0];
+
+            // Calculate touch movement distance from the center of the circle
+            const deltaX = touch.clientX - window.innerWidth / 2;
+            const deltaY = touch.clientY - window.innerHeight / 2;
+            const threshold = 100;
+            //console.log(deltaY)
+            if (deltaY < -threshold) {
+                moveForward = true;
+            } else if (deltaY > threshold) {
+                moveBackward = true;
+            } else if (deltaX < 0) {
+                rotateLeft = true;
             } else {
-                controls.enabled = false;
-                blocker.style.display = 'block';
-                instructions.style.display = '';
+                rotateRight = true;
             }
-        };
- 
-        const pointerlockerror = () => {
-            //instructions.style.display = '';
-        };
- 
-        document.addEventListener('pointerlockchange', pointerlockchange, false);
-        document.addEventListener('pointerlockerror', pointerlockerror, false);*/
+            // Update camera position based on touch position
+            //character.position.x += movementXRatio * maxMovement;
+            //const rotationY = Math.max(maxRotation, (deltaX / maxMovement) * Math.PI);  // Rotate up to PI radians (180 degrees)
+            //character.rotation.y += 0.01;//rotationY;
+            //character.position.z -= movementYRatio * maxMovement;
+            //console.log(maxMovement)
+            //console.log(movementYRatio);
+        }
 
-        /*const controls = new THREE.FirstPersonControls(camera);
-        controls.movementSpeed = 0.1;
-        controls.lookSpeed = 0.05;*/
 
         // Animation loop
         let moveDown = false;
@@ -772,16 +814,16 @@
                 }
             } else {
                 // Move the character forward
-                if (keys['ArrowUp'] || keys["w"] || keys["W"]) {
+                if (keys['ArrowUp'] || keys["w"] || keys["W"] || moveForward) {
                     character.translateZ(movementSpeed);
                 }
-                if (keys['ArrowDown'] || keys["s"] || keys["S"]) {
+                if (keys['ArrowDown'] || keys["s"] || keys["S"] || moveBackward) {
                     character.translateZ(-movementSpeed);
                 }
-                if (keys['ArrowLeft'] || keys["a"] || keys["A"]) {
+                if (keys['ArrowLeft'] || keys["a"] || keys["A"] || rotateLeft) {
                     character.rotation.y += 0.05;
                 }
-                if (keys['ArrowRight'] || keys["d"] || keys["D"]) {
+                if (keys['ArrowRight'] || keys["d"] || keys["D"] || rotateRight) {
                     character.rotation.y -= 0.05;
                 }
                 if (keys['R'] || keys['r']) {
@@ -855,8 +897,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
     <script defer src="web3.js"></script>
     <script src="indexHelper.js"></script>
-    <script>const global = globalThis;</script>
-    <script type="module" src="main.js"></script>
+    <!--
+    <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
+    <script>
+
+        const MMSDK = new MetaMaskSDK.MetaMaskSDK()
+        // Because init process of the MetaMaskSDK is async.
+        setTimeout(async () => {
+            const ethereum = MMSDK.getProvider() // You can also access via window.ethereum
+
+            a = await ethereum.request({ method: 'eth_requestAccounts' })
+            alert(a);
+        }, 0)
+
+    </script>
+-->
+    </head>
+
 </body>
 
 </html>

@@ -13,13 +13,16 @@ server.on('connection', (client) => {
     //console.log(`Received message: ${message}`);
     data = JSON.parse(message);
     messageType = data.type;
+
     if (messageType === "join") {
       // TODO so can send messages offline but anyway should store in web3 instead?
     } else if (messageType === "msg") {
+      //console.log(`Received message: ${message}`);
       // Broadcast the message to all connected clients
       clients.forEach((c) => {
         if (c !== client && c.readyState === WebSocket.OPEN) {
-          c.send(message);
+          c.send(JSON.stringify(data)); 
+          //c.send(message); // somehow got error if use this
         }
       });
     } else if (messageType === "dm") {
@@ -59,14 +62,17 @@ server.on('connection', (client) => {
 setInterval(() => {
   // Broadcast all positions to every client
   //console.log(positions);
-  const message = JSON.stringify({ type: 'positions', data: positions });
+  const position = JSON.stringify({ type: 'positions', data: positions });
   const direct_message = JSON.stringify({ type: 'dm_messages', data: direct_messages });
-  clients.forEach((data, client) => {
+  clients.forEach((client) => {
+    //console.log(positions);
     if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-      client.send(direct_message);
+      client.send(position);
+      if (direct_messages.length > 0) {
+        client.send(direct_message);
+      }
     }
   });
-}, 100); // Send updates every 1 millisecond
+}, 200); // Send updates every 2 millisecond in case too many people try
 
 console.log('WebSocket chat server listening on port 8080');
