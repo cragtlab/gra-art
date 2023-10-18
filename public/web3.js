@@ -9,7 +9,7 @@ async function fetchJSON(jsonFilePath) {
         });
 }
 let web3, accounts, networkId;
-let contractJSON, contract, paintingAddress;
+let contractJSON, contract, paintingAddress, vipJSON, vipContract;
 let web3Paintings, web3Names;
 async function clickConnect() {
     web3 = new Web3(window.ethereum);
@@ -20,10 +20,25 @@ async function clickConnect() {
     paintingAddress = contractJSON.networks[networkId].address;
     contract = await new web3.eth.Contract(contractJSON.abi, paintingAddress);
 
+    vipJSON = await fetchJSON("/src/abis/VIPNFT.json");
+    vipContract = await new web3.eth.Contract(vipJSON.abi, vipJSON.networks[networkId].address);
+
     refreshData();
 }
 function changeName() {
     addName();
+}
+function getVIP() {
+    vipContract.methods.mint(accounts[0]).send({ from: accounts[0] }).then(function (result) {
+        vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
+            if (result2 == 1) {
+                alert("Congratulations, you are now a VIP");
+            } else {
+                alert("Failed to Become VIP. Please try again"); // maybe user cancel
+            }
+
+        });
+    });
 }
 
 async function refreshData() {
@@ -36,12 +51,24 @@ async function refreshData() {
     if (typeof (loadAuctionPainting) != 'undefined') {
         connectBtn.textContent = getNiceName(accounts[0]);
         changeNameBtn.style.display = '';
+        vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
+            if (result2 == 1) {
+                getVIPBtn.style.display='';
+                getVIPBtn.name='You are VIP!';
+                getVIPBtn.disabled='disabled';
+            } else {
+                getVIPBtn.style.display='';
+                getVIPBtn.name='Get VIP';
+                getVIPBtn.disabled='';
+            }
+
+        });
         loadAuctionPainting(await getAuctionPaintingID());
     }
 }
 
 function getNiceName(walletAddress) {
-    if(!web3Names){
+    if (!web3Names) {
         console.log("what is this");
         if (walletAddress.length > 5) {
             return walletAddress.substring(0, 5) + "..";

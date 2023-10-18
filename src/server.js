@@ -1,14 +1,18 @@
 const WebSocket = require('ws');
+var Web3 = require('web3'); // for unregistered user to see painting info and auction
+
 const server = new WebSocket.Server({ port: 8080 });
 const clients = new Set();
 const client2positions = {};
 const positions = {};
 const direct_messages = [];
+
+var web3 = new Web3(Web3.givenProvider) 
+
 server.on('connection', (client) => {
   console.log('Client connected');
   clients.add(client);
   console.log('size is ' + clients.size);
-
 
   client.on('message', (message) => {
     //console.log(`Received message: ${message}`);

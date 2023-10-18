@@ -96,8 +96,8 @@
       if (timeToAnnounce) {
         timeToAnnounce = false;
         if (bidHistoryElement.innerHTML.split("<br>")[0] === lastBidAnnouncement && lastBidAnnouncement.indexOf("ended") == -1 && lastBidAnnouncement.indexOf("next auction") == -1) {
-          speakEncouragement();
-        } else if(bidHistoryElement.innerHTML.split("<br>")[0] != lastBidAnnouncement){
+          speakEncouragement(minutes < 3);
+        } else if (bidHistoryElement.innerHTML.split("<br>")[0] != lastBidAnnouncement) {
           lastBidAnnouncement = bidHistoryElement.innerHTML.split("<br>")[0];
           speak(lastBidAnnouncement);
         }
@@ -107,9 +107,22 @@
     function speak(text) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.5;
+      for (voice of window.speechSynthesis.getVoices()) {
+        if (voice.name == "Google UK English Male") {
+          utterance.voice = voice;
+          utterance.rate = 1.2;
+        }
+      }
       window.speechSynthesis.speak(utterance);
     }
-    function speakEncouragement() {
+    function testAllVoices() {
+      id = 0; for (i of window.speechSynthesis.getVoices()) {
+        const utterance = new SpeechSynthesisUtterance("apple are good. this is index " + (id++));
+        utterance.rate = 1; utterance.voice = i;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    function speakEncouragement(timeRunningOut) {
       const encouragementMessages = [
         "Bidding is still open! Place your bid now and be part of the excitement.",
         "Don't miss out! Place your bid and own this amazing art piece.",
@@ -122,8 +135,23 @@
         "Unleash your competitive spirit! Place your bid and challenge others.",
         "Bidding is a thrill! Join the action by placing your bid and aim for the top."
       ];
-      const randomIndex = Math.floor(Math.random() * encouragementMessages.length);
-      speak(encouragementMessages[randomIndex]);
+
+      const encouragementMessagesBelow3Mins = [
+        "Ladies and gentlemen, we're down to the final three minutes! Don't miss out on your chance to own this fantastic item. Keep those bids coming!",
+        "Time is running out! This is your moment to make your move. Who will be the lucky winner? Bid now!",
+        "Less than three minutes left on the clock. Make your bids count and secure this incredible piece. It's going, going...",
+        "It's crunch time, folks! Three minutes to go. If you want it, bid now and show everyone you mean business!",
+        "The countdown has begun, and the clock is ticking. Bid high, bid fast, and claim your prize. Less than three minutes left!"
+      ]
+      if (timeRunningOut) {
+        msgs = encouragementMessagesBelow3Mins;
+      } else {
+        msgs = encouragementMessages;
+
+      }
+
+      const randomIndex = Math.floor(Math.random() * msgs.length);
+      speak(msgs[randomIndex]);
     }
 
     function placeBid() {
@@ -134,7 +162,7 @@
       }
     }
     function placeBidHigher() {
-      document.getElementById('bidAmount').value = (highestBidAmount*1 + 1); 
+      document.getElementById('bidAmount').value = (highestBidAmount * 1 + 1);
       placeBid();
     }
 

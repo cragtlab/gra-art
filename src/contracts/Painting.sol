@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // 1-to-1 NFT
-import "@openzeppelin/contracts/token/common/ERC2981.sol"; // royalty 
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
 
-contract Painting is ERC721, ERC721Royalty {
+contract Painting is ERC721Royalty {
     uint256 public cost = 0.001 ether; // mint price, will reject if below
     uint256 public maxSupply = 20;
     uint256 public totalSupply = 0;
@@ -43,11 +43,17 @@ contract Painting is ERC721, ERC721Royalty {
         contract_owner = msg.sender; // security to restrict addPainting to only deployer
         address creator = address(0x3A3593B8e169236289Cf8699876A8Af393B02230);
 
+        _setDefaultRoyalty(creator, 1000); // 10%
+
         addPainting("Life Is Good", creator, 0);
         addPainting("Adventures Await", creator, 0);
         addPainting("Journey On", creator, 0);
         addPainting("Speed Up", creator, 0);
-        addPainting("Fast Train", address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), 0);
+        addPainting(
+            "Fast Train",
+            address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6),
+            0
+        );
 
         addPainting("Maximum Throttle", creator, 0);
         addPainting("MBS", creator, 0);
@@ -56,7 +62,11 @@ contract Painting is ERC721, ERC721Royalty {
         addPainting("Sunset", creator, 0);
 
         addPainting("Blossoms", creator, 0);
-        addPainting("Darkness", address(0x3A3593B8e169236289Cf8699876A8Af393B02230), 0);
+        addPainting(
+            "Darkness",
+            address(0x3A3593B8e169236289Cf8699876A8Af393B02230),
+            0
+        );
         addPainting("Bright", creator, 0);
         addPainting("Rainbow Tree", creator, 0);
         addPainting("Relax", creator, 0);
@@ -65,6 +75,7 @@ contract Painting is ERC721, ERC721Royalty {
         addName(address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), "lenovo");
         addName(address(0x21586e20921f2d6C068830C9460c728c9a3411a2), "sm");
         addName(address(0xCAAE7Ee609621f5B64d7553fdee4696B2a4Eb56F), "CC");
+        addName(address(0xeC79fC264b134eA21161D7e1487676b8D26B6AE8), "Homely");
         /*
         paintings[0].owner=address(0xB793eca1c417B001fa2b82cc35f8488124C54F0e);
         paintings[0].list_price=-1; 

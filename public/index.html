@@ -82,7 +82,8 @@
         }
 
         #connectBtn,
-        #changeNameBtn {
+        #changeNameBtn,
+        #getVIPBtn {
             background: #1D8482;
             color: #E0F1FF;
         }
@@ -153,6 +154,7 @@
             animation-duration: 10s;
             animation-timing-function: linear;
             animation-iteration-count: infinite;
+            font-family: Helvetica Neue Light;
 
         }
 
@@ -173,11 +175,12 @@
     <div id="container">
         <canvas id="loadingCanvas"></canvas>
         <div id="overlay">
-            <h2>Scan To Join The MetaVerse (Limited to 30 pax)</h2>
-            <img width="320" height="320" align="left" />
-            <h2>Explorer or Web3 Wallet User?</h2>
+            <h2>Scan To Join The MetaVerse (Limited pax)</h2>
+            <img width="150" height="150" align="left"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://"
+                +location.hostname+":5500/public/index.html" />
             <button onclick="unregistered_name=prompt('Enter Name');if(unregistered_name){loaded=true;}"
-                style="width: 30%">Explore</button>
+                style="width: 30%">Explorer Mode</button>
             <br /><b>OR</b>
             <br /><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
         </div>
@@ -187,6 +190,7 @@
         <w3m-core-button></w3m-core-button>
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
         <button id="changeNameBtn" style="display:none" onclick="changeName()">Change Name</button>
+        <button id="getVIPBtn" style="display:none" onclick="getVIP()">Get VIP</button>
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
@@ -252,15 +256,24 @@
                 }
             }
         }
+
+        let lastWhoIsOnlineAnnouncement = null;
         function showWhoIsOnline() {
-            if (playerPositions.length == 0) return;
+            if (playerPositions.length == 0) {
+                lastWhoIsOnlineAnnouncement = null; // reset too
+                return;
+            }
             msg = playerPositions.length + " other people online. Chat to them: ";
             for (player of playerPositions) {
                 if (player.addr) { // only connected wallets
                     msg += "<a href='#' onclick='showTab(\"" + player.addr + "\");return false'>" + getNiceName(player.addr) + "</a> ";
                 }
             }
-            chatarea.innerHTML = "<b>System: </b>" + msg + "<br/>" + chatarea.innerHTML;
+
+            if (msg != lastWhoIsOnlineAnnouncement) {
+                lastWhoIsOnlineAnnouncement = msg; // prevent repeated msg
+                chatarea.innerHTML = "<b>System: </b>" + msg + "<br/>" + chatarea.innerHTML;
+            }
 
         }
 
@@ -451,7 +464,10 @@
                     //paintings.splice(0, 0, painting);
                     paintings.push(painting);
                     painting.position.set(col - mazeMatrix.length / 2, 0.6, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
-                    painting.rotation.y = -Math.PI
+                    if (mazeMatrix[row][col] === 2) {
+                        painting.rotation.y = -Math.PI  // flip as mirror
+                    }
+
                     scene.add(painting);
                 } else if (mazeMatrix[row][col] === 4) {
                     const paintingGeometry = new THREE.PlaneGeometry(2, 2); // Adjust size as needed
@@ -459,7 +475,7 @@
                     const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide }); // black first until contract load?
                     auction_painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
                     auction_painting.position.set(col - mazeMatrix.length / 2, 1.4, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
-
+                    auction_painting.rotation.y = -Math.PI;
                     scene.add(auction_painting);
                 }
             }
@@ -494,7 +510,9 @@
                     //paintings.splice(0, 0, painting);
                     paintings.push(painting);
                     painting.position.set(col - level2Matrix.length / 2, level_2_start * 1.5 - 0.6, row - level2Matrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
-                    painting.rotation.y = -Math.PI
+                    if (level2Matrix[row][col] === 2) {
+                        painting.rotation.y = -Math.PI  // flip as mirror
+                    }
 
                     scene.add(painting);
                 }
@@ -600,13 +618,39 @@
             }
         });
 
-
+        let showBuyVIPAlready = false;
         function moveWithLift() {
-            if (true) {
-                moveY = true;
-                exitedLift = false;
-            } else {
-                //alert("Buy a VIP NFT to enter the HL Zone");
+            if (accounts && accounts.length > 0) {
+                vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result) {
+                    console.log("result: " + result);
+                    if (result == 1) {
+                        moveY = true;
+                        exitedLift = false;
+                    } else if (!showBuyVIPAlready) {
+                        showBuyVIPAlready = true;
+                        //character.position.set(-2.9, 0, 0.94);
+                        //character.rotation.y = -1.7;
+                        m = startMarquee("System: Only VIPs can enter the lift to level 2. Buy one to enjoy our lifetime VIP benefits.");
+                        m.addEventListener('animationend', () => {
+                            showBuyVIPAlready = false;
+                        });
+                        chatarea.innerHTML = "<b>System: </b> Only VIP can enter the lift to level 2. <a href='#' onclick='alert(\"trigger Mint NFT\")'>Buy one now!</a><br/>"
+                            + chatarea.innerHTML;
+
+                    }
+                });
+            } else if (!showBuyVIPAlready) {
+                showBuyVIPAlready = true;
+                // unregistered user cannot go up too
+                //character.position.set(-2.9, 0, 0.94);
+                //character.rotation.y = -1.7;
+                m = startMarquee("System: Only VIPs can enter the lift to level 2. Login with a wallet and buy one to enjoy our lifetime VIP benefits.");
+                m.addEventListener('animationend', () => {
+                    showBuyVIPAlready = false;
+                });
+                chatarea.innerHTML = "<b>System: </b> Only VIP can enter the lift to level 2. Buy one now!<br/>"
+                    + chatarea.innerHTML;
+
             }
         }
 
@@ -869,6 +913,8 @@
                 marquee.remove();
             });
             currentMarqueeRow = (currentMarqueeRow % 3) + 1;
+
+            return marquee; // return so that can allow VIP message again
         }
 
         let rotateLeft, rotateRight, moveForward, moveBackward;
@@ -913,7 +959,7 @@
         /*function onTouchMove(event) {
             //event.preventDefault();
             const touch = event.touches[0];
-
+ 
             // Calculate touch movement distance from the center of the circle
             const deltaX = touch.clientX - window.innerWidth / 2;
             const deltaY = touch.clientY - window.innerHeight / 2;
