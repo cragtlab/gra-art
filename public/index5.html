@@ -14,7 +14,7 @@
       var scene = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 2000);
       scene.add(camera);
-      camera.position.set(0,35,70);
+      camera.position.set(0,0,70);
 
       var renderer = new THREE.WebGLRenderer({antialias: true});
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,9 +27,9 @@
       var ambientLight = new THREE.AmbientLight(0xf1f1f1);
       scene.add(ambientLight);
 
-      var spotLight = new THREE.DirectionalLight(0xffffff);
-      spotLight.position.set(50,50,50);
-      scene.add(spotLight);
+      //var spotLight = new THREE.DirectionalLight(0xffffff);
+      //spotLight.position.set(50,50,50);
+      //scene.add(spotLight);
 
       //Objects (We build a mesh using a geometry and a material)
 
@@ -96,6 +96,7 @@
         moon.position.x = r * Math.cos(theta);
         moon.position.z = r * Math.sin(theta);
 
+        /*
         //Flyby
         if (camera.position.z < 0) {
           dx *= -1;
@@ -111,7 +112,7 @@
           camera.position.set(0,35,70);
         }
 
-        camera.lookAt(earthVec);
+        camera.lookAt(earthVec);*/
         renderer.render(scene, camera);
         requestAnimationFrame(render);
       };

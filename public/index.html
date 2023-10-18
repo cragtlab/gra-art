@@ -1,6 +1,6 @@
 <!--
     mobile can chat and move?
-    painting 10-15 cannot mint
+    
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -239,8 +239,8 @@
     <!-- <script src="CSS3DRenderer.js"></script> looks terrible to embed this way -->
     <script>
         var isTouchScreen = 'ontouchstart' in window || navigator.msMaxTouchPoints;
-        if(typeof(isTouchScreen) == 'undefined'){
-            document.querySelector("#circle-overlay").style.display='none';
+        if (typeof (isTouchScreen) == 'undefined') {
+            document.querySelector("#circle-overlay").style.display = 'none';
         }
 
         var playerPositions = [
@@ -451,7 +451,7 @@
         wallTexture.offset.set(0, 0);
         wallTexture.repeat.set(1, 1); // 1 seem good enough
         const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
-        
+
 
         let auction_painting;
         let auction_painting_id = -1;
@@ -1134,6 +1134,12 @@
                 camera.lookAt(character.position);
                 textLabel.visible = true;
             }
+            //outer space
+            earth.rotation.y += .0009;
+            theta += dTheta;
+            moon.position.x = r * Math.cos(theta);
+            moon.position.z = r * Math.sin(theta);
+            
             renderer.render(scene, camera);
             //cssRenderer.render(scene, camera);
             //controls.update();
@@ -1147,6 +1153,7 @@
     <script src="web3.js"></script>
     <script src="auction.js"></script>
     <script src="indexHelper.js"></script>
+    <script defer src="outer_space.js"></script>
     <!--
     <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
     <script>
