@@ -1,25 +1,21 @@
 
 let socket;
-let connecting = false;
 connect();
 
 function connect() {
-    if (!connecting)
-        socket = new WebSocket('ws://' + location.hostname + ':8080');
+    socket = new WebSocket('ws://' + location.hostname + ':8080');
 
     socket.addEventListener('open', (event) => {
         console.log('Connected to WebSocket server');
-        connecting = false;
     });
-    socket.onerror = (error) => {
+    /*socket.onerror = (error) => {
         console.error('WebSocket error:', error);
         console.log('Attempting to reconnect in 5s...');
         setTimeout(() => {
-            connecting=false
+            connecting = false
             connect();
         }, 5000);
-
-    };
+    };*/
     socket.addEventListener('message', (event) => {
         //console.log("event.data is");
         //console.log(event.data);
@@ -74,8 +70,45 @@ function connect() {
         //console.log(playerPositions);        
     });
 
+    socket.addEventListener('close', (event) => {
+        console.log('Disconnected from WebSocket server will reconnect');
+        console.log('Attempting to reconnect in 5s...');
+        //clearInterval(sendPosInterval);
+        setTimeout(() => {
+            connect();
+        }, 5000);
+    });
+
+
 }
 let unregistered_name;
+function tryUnregisteredName(takenName) {
+    if (takenName) {
+        unregistered_name = prompt(takenName + ' is taken. Try another name please!', takenName);
+    } else {
+        console.log('why prompt this?');
+        unregistered_name = prompt('Enter Name');
+    }
+    if (unregistered_name) {
+        unregistered_name = unregistered_name.toLowerCase();
+        found = false;
+        for (p of playerPositions) {
+            if (p.addr === unregistered_name.toLowerCase()) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            loaded = true;
+            explorerBtn.disabled = 'disabled';
+        } else {
+            tryUnregisteredName(unregistered_name); // prompt again that name taken
+        }
+    }
+}
+
+
 // return true if got accounts[0] is me or is unregistered_name 
 function isMe(address) {
     if (accounts && accounts.length > 0) {
@@ -83,7 +116,7 @@ function isMe(address) {
     }
 
     if (unregistered_name) {
-        return address === unregistered_name;
+        return address === unregistered_name.toLowerCase();
     }
 
     return false;
@@ -92,11 +125,7 @@ function sendMessage(msg) {
     //console.log(toAddr+ " //// "+msg); 
     if (!accounts) {
         if (!unregistered_name) {
-            unregistered_name = prompt("Choose your name (Note you need to connect wallet to particpate in auction");
-            loaded=true; // load
-            chatarea.innerHTML = "<b>System: </b> Note you need to connect wallet (top right) to particpate in auction<br/>" + chatarea.innerHTML;
-            
-            //unregistered_name += ""; // maybe add some random hash so will be unique rather than server do
+            tryUnregisteredName();
         }
         if (unregistered_name) {
             if (toAddr) {
@@ -141,14 +170,6 @@ function sendMyPosition() {
         // somehow IE allow accounts.length 0
     }
 
-    socket.addEventListener('close', (event) => {
-        console.log('Disconnected from WebSocket server will reconnect');
-        console.log('Attempting to reconnect in 5s...');
-        //clearInterval(sendPosInterval);
-        setTimeout(() => {
-            connect();
-        }, 5000);
-    });
 
 
 

@@ -127,6 +127,7 @@ xxx(); function xxx() {
     function gameLoop() {
         if(typeof(accounts) != 'undefined' && accounts[0]){
             loaded=true;
+            explorerBtn.disabled ='disabled';
             //alert("yeah" + accounts[0]);
         }
         if (loaded) {

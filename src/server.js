@@ -6,11 +6,13 @@ const clients = new Set();
 const client2positions = {};
 const positions = {};
 const direct_messages = [];
+id = 0;
 
 var web3 = new Web3(Web3.givenProvider) 
 
 server.on('connection', (client) => {
   console.log('Client connected');
+  client.id = id++; // unique as same browser seem to be same client 
   clients.add(client);
   console.log('size is ' + clients.size);
 
@@ -53,7 +55,7 @@ server.on('connection', (client) => {
         console.log("why got empty sender position?" + data + "//" + data.sender);
         return;
       }
-      client2positions[client]=data.sender.toLowerCase(); // store to remove at disconnect
+      client2positions[client.id]=data.sender.toLowerCase(); // store to remove at disconnect
       positions[data.sender.toLowerCase()] = {
         geoChoice: data.geoChoice,
         colorChoice: data.colorChoice,
@@ -68,7 +70,9 @@ server.on('connection', (client) => {
   client.on('close', () => {
     console.log('Client disconnected');
     clients.delete(client);
-    delete positions[client2positions[client]];
+    
+    delete positions[client2positions[client.id]];
+    console.log(positions);    
     console.log('size is ' + clients.size);
   });
 });

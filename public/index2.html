@@ -28,6 +28,15 @@
   <div id="bidHistory"></div>
 
   <script>
+    const utterance = new SpeechSynthesisUtterance();
+    utterance.rate = 1.5;
+    for (voice of window.speechSynthesis.getVoices()) {
+      if (voice.name == "Google UK English Male") {
+        utterance.voice = voice;
+        utterance.rate = 1.2;
+      }
+    }
+
     let lastBidAmount = 0; // to create excitement if bidded and outbid
     let timeToAnnounce = false;
     let highestBidAmount = 0;
@@ -105,14 +114,7 @@
       }
     }, 100);
     function speak(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.5;
-      for (voice of window.speechSynthesis.getVoices()) {
-        if (voice.name == "Google UK English Male") {
-          utterance.voice = voice;
-          utterance.rate = 1.2;
-        }
-      }
+      utterance.text=text;
       window.speechSynthesis.speak(utterance);
     }
     function testAllVoices() {

@@ -13,9 +13,33 @@ let contractJSON, contract, paintingAddress, vipJSON, vipContract;
 let web3Paintings, web3Names;
 async function clickConnect() {
     web3 = new Web3(window.ethereum);
-    web3.eth.requestAccounts(); // for edge to work else accounts.length 0?
-    accounts = await web3.eth.getAccounts();
-    networkId = await web3.eth.net.getId();
+    try {
+        web3.eth.requestAccounts(); // for edge to work else accounts.length 0?
+        accounts = await web3.eth.getAccounts();
+        networkId = await web3.eth.net.getId();
+    } catch (ex) {
+        // all for the sake of non-wallet users
+        console.error(ex);
+        console.log("for non-wallet users, defaulting to 80001 network Id for mumbai for web3Painting only. cannot do auction else rated limited cause refreshing every s");
+
+        let rpc = "https://rpc-mumbai.maticvigil.com/v1/9699793cf270b63215f6aa760a938012551a80b1";
+        provider = new Web3.providers.HttpProvider(rpc);
+        web3x = new Web3(provider);
+        networkId = await web3x.eth.net.getId();
+
+        contractJSON = await fetchJSON("/src/abis/Painting.json");
+        paintingAddress = contractJSON.networks[networkId].address;
+        contractX = await new web3x.eth.Contract(contractJSON.abi, paintingAddress);
+
+        web3Paintings = await contractX.methods.getPaintings().call()
+
+        web3Names = await contractX.methods.getNames().call(); // getNames
+        loadAuctionPainting(await contractX.methods.getAuctionPaintingID().call());// getAuctionPaintingID());
+        // store array into names[wallet_address] map
+        /* cannot 
+            /*
+        */
+    }
     contractJSON = await fetchJSON("/src/abis/Painting.json");
     paintingAddress = contractJSON.networks[networkId].address;
     contract = await new web3.eth.Contract(contractJSON.abi, paintingAddress);
@@ -41,6 +65,7 @@ function getVIP() {
     });
 }
 
+
 async function refreshData() {
     web3Paintings = await contract.methods.getPaintings().call()
     web3Names = await getNames(); // store array into names[wallet_address] map
@@ -53,13 +78,13 @@ async function refreshData() {
         changeNameBtn.style.display = '';
         vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
             if (result2 == 1) {
-                getVIPBtn.style.display='';
-                getVIPBtn.name='You are VIP!';
-                getVIPBtn.disabled='disabled';
+                getVIPBtn.style.display = '';
+                getVIPBtn.name = 'You are VIP!';
+                getVIPBtn.disabled = 'disabled';
             } else {
-                getVIPBtn.style.display='';
-                getVIPBtn.name='Get VIP';
-                getVIPBtn.disabled='';
+                getVIPBtn.style.display = '';
+                getVIPBtn.name = 'Get VIP';
+                getVIPBtn.disabled = '';
             }
 
         });

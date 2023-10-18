@@ -121,6 +121,7 @@ xxx(); function xxx() {
     var render = function () {
         if(accounts && accounts[0]){
             loaded=true;
+            explorerBtn.disabled ='disabled';
             alert("yeah");
         }
         if (loaded) {

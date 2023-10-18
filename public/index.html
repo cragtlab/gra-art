@@ -23,7 +23,9 @@
             font-size: 18px;
         }
 
-        #paintingInfo {
+        #paintingDetails {
+            z-index: 10000;
+            /* +1 from marquee */
             background-color: rgba(255, 255, 255, 0.9);
             position: absolute;
             top: 60px;
@@ -32,6 +34,8 @@
             font-family: Helvetica Neue Light;
             font-size: 18px;
         }
+
+        #paintingInfo {}
 
         #chatbox {
             background-color: rgba(255, 255, 255, 0.9);
@@ -67,7 +71,7 @@
             padding: 10px;
             overflow: auto;
             left: 10px;
-            height: 30px;
+            /*height: 30px;*/
         }
 
         .tab-content {
@@ -98,12 +102,6 @@
             top: calc(50% - 50px);
             /*bottom: 200px; must substract from this as now using midpoint*/
             pointer-events: none;
-        }
-
-        @media (min-width: 768px) {
-            #circle-overlay {
-                display: none;
-            }
         }
 
         #container {
@@ -179,8 +177,7 @@
             <img width="150" height="150" align="left"
                 src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://"
                 +location.hostname+":5500/public/index.html" />
-            <button onclick="unregistered_name=prompt('Enter Name');if(unregistered_name){loaded=true;}"
-                style="width: 30%">Explorer Mode</button>
+            <button id='explorerBtn' onclick="tryUnregisteredName()" style="width: 30%">Explorer Mode</button>
             <br /><b>OR</b>
             <br /><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
         </div>
@@ -194,7 +191,22 @@
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
-    <div id='paintingInfo'></div>
+    <div id='paintingDetails'>
+        <div id='paintingInfo'></div>
+        <div id='auctionInfo'>
+            <div id="bidFun"></div>
+            <span id="live_auction" style='display:none'>
+                <label for="bidAmount">Enter Bid: $</label>
+                <input type="number" id="bidAmount" min="0" step="1">
+                <button onclick="placeBid()">Place Bid</button>
+                <button onclick="placeBidHigher()">Place Higher Bid</button>
+            </span>
+            <span id="ended_auction" style='display:none'>
+                <button onclick="payAuction()">Pay For Auction</button>
+            </span>
+            <div id="bidHistory"></div>
+        </div>
+    </div>
 
     <!-- <b>System: </b>Buy a <a target=_blank href=''>VIP NFT</a> to enter the 2nd level<br />-->
     <div id='chatarea' class='chatarea'><b>System:
@@ -226,6 +238,11 @@
     <!-- <script src="FirstPersonControls.js"></script> -->
     <!-- <script src="CSS3DRenderer.js"></script> looks terrible to embed this way -->
     <script>
+        var isTouchScreen = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+        if(typeof(isTouchScreen) == 'undefined'){
+            document.querySelector("#circle-overlay").style.display='none';
+        }
+
         var playerPositions = [
             // { geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 }, ry: -0.5 }
         ];
@@ -379,24 +396,13 @@
         const renderer = new THREE.WebGLRenderer({ precision: 'mediump', canvas: document.getElementById("canvas") });
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        /*
-                var cssRenderer = new THREE.CSS3DRenderer();
-                cssRenderer.setSize(window.innerWidth, window.innerHeight);
-                cssRenderer.domElement.style.position = 'absolute';
-                cssRenderer.domElement.style.top = 0;
-                document.body.appendChild(cssRenderer.domElement);
-                // Create a video div and object for the YouTube video
-                var videoDiv = document.createElement('div');
-                //videoDiv.innerHTML = '<iframe width="320" height="180" src="https://www.youtube.com/embed/BWxMuQre3R8?autoplay=1" frameborder="0" allowfullscreen></iframe>';
-                videoDiv.innerHTML = '<iframe width="320" height="180" src="https://www.youtube.com/embed/BWxMuQre3R8?autoplay=1" frameborder="0" allowfullscreen></iframe>';
-                var videoObject = new THREE.CSS3DObject(videoDiv);
-                videoObject.scale.set(0.01, 0.01, 0.01);
-                videoObject.position.set(0, 1.5, -10); // Adjust the video position
-                scene.add(videoObject);
-        */
         // Create a floor for the room
         const floorGeometry = new THREE.PlaneGeometry(15, 15);
-        const floorTexture = new THREE.TextureLoader().load('Floor.jpg'); // Load your painting image
+        const floorTexture = new THREE.TextureLoader().load('Floor2.jpg'); // Load your painting image
+        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.offset.set(0, 0);
+        floorTexture.repeat.set(10, 10)
+
         const floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
         //const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
         const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -440,8 +446,13 @@
         const level_2_start = 2.5;
         const painting_zAdjust = 0.45;
         //const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 });
-        const wallTexture = new THREE.TextureLoader().load('Seamless wall white paint stucco plaster texture.jpg');
+        let wallTexture = new THREE.TextureLoader().load('Seamless wall white paint stucco plaster texture.jpg');
+        wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
+        wallTexture.offset.set(0, 0);
+        wallTexture.repeat.set(1, 1); // 1 seem good enough
         const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
+        
+
         let auction_painting;
         let auction_painting_id = -1;
         paintings = [];
@@ -540,81 +551,118 @@
         });
         window.addEventListener('click', () => {
             // Check for intersections with the cube when clicked
+
             raycaster.setFromCamera(mouse, camera);
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
                 if (auction_painting_id == 0) {
                     paintingInfo.innerHTML = "No Auction Currently. Please wait for next auction";
+                    auctionInfo.style.display = 'none'; // only visible if auction
                 } else {
                     paintingInfo.innerHTML =
                         "<a id='paintingName' target=_blank>Painting #" + auction_painting_id + "</a>"
-                        + "<br/>Message Artist: <a href='#' id='creator'></a> "
-                        + "<br/><iframe width=500 height=300 src=/public/index2.html></iframe>";
+                        + "<br/>Message Artist: <a href='#' id='creator'></a> ";
+                    auctionInfo.style.display = '';
+                    loadAuctionDiv();
+                    //+ "<br/><iframe width=500 height=300 src=/public/index2.html></iframe>";
 
                     getPainting(auction_painting_id - 1).then((painting) => {
+                        paintingName.textContent = "Painting #" + auction_painting_id + " (" + painting.name + ")";
+                        creator.setAttribute("onclick", "showTab('" + painting.creator + "');return false;");
+                        creator.innerText = getNiceName(painting.creator);
+                    }).catch((ex) => {
+                        console.log("Error in loading getPainting so fallback");
+                        painting = web3Paintings[auction_painting_id - 1];
+                        paintingName.textContent = "Painting #" + auction_painting_id + 1 + " (" + painting.name + ")";
                         creator.setAttribute("onclick", "showTab('" + painting.creator + "');return false;");
                         creator.innerText = getNiceName(painting.creator);
                     });
+
+
+
                 }
             } else if (raycaster.intersectObjects(paintings).length > 0) {
+                auctionInfo.style.display = 'none'; // only visible if auction
                 const clickedPainting = raycaster.intersectObjects(paintings)[0].object;
                 const clickedPaintingIndex = paintings.indexOf(clickedPainting);
                 const id = clickedPaintingIndex + 1;
                 //console.log(clickedPainting);
-                paintingInfo.innerHTML =
-                    "<a id='paintingName' target=_blank>Painting #" + id
-                    + "</a>"
-                    + "<br/>Owner: <a target='blank' id='ownerHref'></a>"
-                    + "<br/>Message Artist: <a href='#' id='creator'></a> "
-                    + "<br/><input type='button' id='" + (id) + "'>";
+                if (unregistered_name) {
 
-                getPainting(clickedPaintingIndex).then((painting) => { // 0-based
-                    paintingName.href = "https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id;
-                    paintingName.textContent = "Painting #" + id + " (" + painting.name + ")";
-                    ownerHref.setAttribute("onclick", "showTab('" + painting.owner + "');return false;"); //.href = "https://testnets.opensea.io/" + painting.owner;
-                    button = document.querySelector("input[id='" + id + "']");
-                    // message creator
-                    creator.setAttribute("onclick", "showTab('" + painting.creator + "');return false;");
-                    creator.innerText = getNiceName(painting.creator);
-
-                    if (painting.owner === "0x0000000000000000000000000000000000000000") { // unowned
-                        ownerHref.innerHTML = "Not Owned";
-                        ownerHref.href = "";
-                        button.value = "Mint";
-                        button.onclick = function () { mintPainting(this.id) };
-                    } else if (painting.owner === accounts[0]) { // owner is self, can list
-                        ownerHref.innerHTML = "<b>You</b>";
-                        button.onclick = function () {
-                            var price = prompt("Price to List At");
-                            if (price) {
-                                //window.open("https://testnets.opensea.io/assets/mumbai/"+paintingAddress+"/"+id);
-                                listPainting(id, price);
-                            }
-                        };
-
-                        if (painting.list_price === "0" || painting.list_price == 0) { // not listed yet
-                            button.value = "List for Sale";
-                        } else {
-                            button.value = "Listed for " + painting.list_price + ". Update List Price (0 to unlist)";
-                        }
-
-
+                    console.log("for non-web3 users");
+                    info = "";
+                    painting = web3Paintings[clickedPaintingIndex];
+                    if (painting.owner == "0x0000000000000000000000000000000000000000") {
+                        info = "Painting #" + id + " (" + painting.name + ")<br/>Not Owned";
                     } else {
-                        ownerHref.innerHTML = getNiceName(painting.owner);
-                        if (painting.list_price === "0" || painting.list_price == 0) {
-                            button.value = "Not For Sale (View On OpenSea)";
-                            button.onclick = function () {
-                                window.open("https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id);
-                            };
-                        } else {
-
-                            button.value = "Buy (Listed at " + painting.list_price + ")";
-                            button.onclick = function () { buyPainting(this.id) };
-                        }
+                        info = "<a target=_blank href='https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id
+                            + "'>Painting #" + id
+                            + " (" + painting.name + ")</a>"
+                            + "<br/>Owner: <a href='#' onclick=\"showTab('" + painting.owner + "');return false;\">" + getNiceName(painting.owner) + "</a>"
                     }
-                });
 
+                    paintingInfo.innerHTML =
+                        info
+                        + "<br/>Message Artist: <a href='#' onclick=\"showTab('" + painting.creator + "');return false;\">" + getNiceName(painting.creator) + "</a>"
+
+                } else {
+                    paintingInfo.innerHTML =
+                        "<a id='paintingName' target=_blank>Painting #" + id
+                        + "</a>"
+                        + "<br/>Owner: <a target='blank' id='ownerHref'></a>"
+                        + "<br/>Message Artist: <a href='#' id='creator'></a> "
+                        + "<br/><input type='button' id='" + (id) + "'>";
+
+
+                    getPainting(clickedPaintingIndex).then((painting) => { // 0-based
+                        paintingName.href = "https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id;
+                        paintingName.textContent = "Painting #" + id + " (" + painting.name + ")";
+                        ownerHref.setAttribute("onclick", "showTab('" + painting.owner + "');return false;"); //.href = "https://testnets.opensea.io/" + painting.owner;
+                        button = document.querySelector("input[id='" + id + "']");
+                        // message creator
+                        creator.setAttribute("onclick", "showTab('" + painting.creator + "');return false;");
+                        creator.innerText = getNiceName(painting.creator);
+
+                        if (painting.owner === "0x0000000000000000000000000000000000000000") { // unowned
+                            paintingName.href = "#"; // since not minted yet
+
+                            ownerHref.innerHTML = "Not Owned";
+                            ownerHref.href = "#";
+                            button.value = "Mint";
+                            button.onclick = function () { mintPainting(this.id) };
+                        } else if (painting.owner === accounts[0]) { // owner is self, can list
+                            ownerHref.innerHTML = "<b>You</b>";
+                            button.onclick = function () {
+                                var price = prompt("Price to List At");
+                                if (price) {
+                                    //window.open("https://testnets.opensea.io/assets/mumbai/"+paintingAddress+"/"+id);
+                                    listPainting(id, price);
+                                }
+                            };
+
+                            if (painting.list_price === "0" || painting.list_price == 0) { // not listed yet
+                                button.value = "List for Sale";
+                            } else {
+                                button.value = "Listed for " + painting.list_price + ". Update List Price (0 to unlist)";
+                            }
+
+
+                        } else {
+                            ownerHref.innerHTML = getNiceName(painting.owner);
+                            if (painting.list_price === "0" || painting.list_price == 0) {
+                                button.value = "Not For Sale (View On OpenSea)";
+                                button.onclick = function () {
+                                    window.open("https://testnets.opensea.io/assets/mumbai/" + paintingAddress + "/" + id);
+                                };
+                            } else {
+
+                                button.value = "Buy (Listed at " + painting.list_price + ")";
+                                button.onclick = function () { buyPainting(this.id) };
+                            }
+                        }
+                    });
+                }
             }
         });
 
@@ -904,9 +952,9 @@
             marquee.classList.add('marquee');
             marquee.classList.add('marquee-container');
             marquee.textContent = emoji;
-            marquee.id = `marquee-row${currentMarqueeRow}`;
+            marquee.id = 'marquee-row' + currentMarqueeRow;
             document.body.appendChild(marquee);
-            //document.querySelector(`#marquee-row${currentMarqueeRow}`).appendChild(marquee);
+            //document.querySelector(`#marquee - row${ currentMarqueeRow }`).appendChild(marquee);
 
             marquee.style.animation = 'marquee 10s linear ';
             marquee.addEventListener('animationend', () => {
@@ -1096,7 +1144,8 @@
     </script>
     <!-- somehow 4.1.1 will have revert error -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"></script>
-    <script defer src="web3.js"></script>
+    <script src="web3.js"></script>
+    <script src="auction.js"></script>
     <script src="indexHelper.js"></script>
     <!--
     <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
