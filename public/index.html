@@ -7,6 +7,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+
     <title>GRA Art Gallery</title>
     <style>
         body {
@@ -39,7 +41,7 @@
 
         #chatbox {
             background-color: rgba(255, 255, 255, 0.9);
-            margin: 10px;
+            /*margin: 10px;*/
             /* padding: 10px;*/
             font-family: Helvetica Neue Light;
             font-size: 18px;
@@ -54,7 +56,7 @@
 
         .chatarea {
             position: absolute;
-            bottom: 85px;
+            bottom: 75px;
             left: 10px;
             background-color: rgba(255, 255, 255, 0.9);
             padding: 10px;
@@ -62,20 +64,21 @@
             height: 200px;
             font-family: Helvetica Neue Light;
             font-size: 18px;
-            width: 600px;
+            width: 300px;
         }
 
         #tabs {
             position: absolute;
-            bottom: 50px;
+            bottom: 30px;
             padding: 10px;
             overflow: auto;
+            /*
             left: 10px;
-            /*height: 30px;*/
+            height: 30px;*/
         }
 
         .tab-content {
-            font-size: 28px;
+            font-size: 15px;
         }
 
         #connectDiv {
@@ -115,40 +118,45 @@
             position: absolute;
             align-items: center;
             justify-content: center;
+
         }
 
         /* emoji scrolling */
         .emoji-container {
-            display: flex;
+            /*    display: flex;*/
         }
 
         .emoji {
-            font-size: 24px;
-            margin: 10px;
+            font-size: 18px;
+            /*margin: 5px;*/
         }
 
         .marquee-container {
             z-index: 9999;
             position: absolute;
             width: 100%;
+            /*overflow: hidden;*/
         }
 
         #marquee-row1 {
-            top: 50px;
+            top: 150px;
+            /*overflow: hidden;*/
         }
 
         #marquee-row2 {
-            top: 80px;
+            top: 180px;
+            /*overflow: hidden;*/
         }
 
         #marquee-row3 {
-            top: 110px;
+            top: 210px;
+            /*overflow: hidden;*/
         }
 
         .marquee {
             font-size: 24px;
             white-space: nowrap;
-            overflow: hidden;
+            /*overflow: hidden;*/
             animation-duration: 10s;
             animation-timing-function: linear;
             animation-iteration-count: infinite;
@@ -172,11 +180,15 @@
 <body>
     <div id="container">
         <canvas id="loadingCanvas"></canvas>
-        <div id="overlay">
-            <h2>Scan To Join The MetaVerse (Limited pax)</h2>
-            <img width="150" height="150" align="left"
-                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://"
-                +location.hostname+":5500/public/index.html" />
+        <div id="overlay" style="width:500px;">
+            <!--<h4>Scan To Join The MetaVerse (Limited pax)</h4>-->
+            <b>Step 1: Scan Left QR Code to login to Wifi</b>
+            <br /><b>Step 2: Scan Right QR Code to open website</b>
+            <br />
+            <img align="left" width="150" src="public/assets/silver.png" />
+            <img id='websiteQR' width="150" height="150" align="right" />
+            <script>websiteQR.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://${location.hostname}:5500/public/index.html`</script>
+
             <button id='explorerBtn' onclick="tryUnregisteredName()" style="width: 30%">Explorer Mode</button>
             <br /><b>OR</b>
             <br /><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
@@ -223,9 +235,17 @@
     <div id="chatbox_div">
         <input id='chatbox' onchange='addMessage("Me",this.value);this.value=""'>
         <div class="emoji-container">
-            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">😊</button>
-            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">🎉</button>
-            <button class="emoji" onclick="addMessage('Me',this.innerHTML);">❤️</button>
+            <button class="emoji" onclick="addMessage('Me', this.innerHTML);">😊</button>
+            <button class="emoji" onclick="addMessage('Me', this.innerHTML);">🎉</button>
+            <button class="emoji" onclick="addMessage('Me', this.innerHTML);">❤️</button>
+            <!-- doesn't stop touchmove<script>
+                for (b of document.querySelectorAll("button[class='emoji']")) {                    
+                    b.addEventListener("click", function (e) {
+                        e.preventDefault();
+                 addMessage('Me', this.innerHTML);
+                        e.stopPropagation();
+                    })
+                }</script>-->
             <!-- Add more emojis and their corresponding functions as needed -->
         </div>
     </div>
@@ -241,6 +261,8 @@
         var isTouchScreen = 'ontouchstart' in window || navigator.msMaxTouchPoints;
         if (typeof (isTouchScreen) == 'undefined') {
             document.querySelector("#circle-overlay").style.display = 'none';
+        } else { // hide for mobile
+            document.querySelector("#positionInfo").style.display = 'none';
         }
 
         var playerPositions = [
@@ -262,14 +284,20 @@
                 sendMessage(msg);
             }
             console.log(toAddr + "// addMessage " + sender + " msg " + msg);
+            if ("😊🎉❤️".indexOf(msg) >= 0) {
+                // process emoji 
+                console.log("processing emoji from " + sender + ": " + msg)
+                startMarquee(getNiceName(sender) + ": " + msg);
+            }
             // if DM to others, just wait for it to return
             if (!toAddr) {
                 if ("😊🎉❤️".indexOf(msg) >= 0) {
-                    // process emoji 
-                    console.log("processing emoji from " + sender + ": " + msg)
-                    startMarquee(getNiceName(sender) + ": " + msg);
+                    // process emoji
+                    //console.log("processing emoji from " + sender + ": " + msg)
+                    //startMarquee(getNiceName(sender) + ": " + msg);
                 } else {
-                    chatarea.innerHTML = "<b>" + sender + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
+                    // use nicename since textarea too small for mobile users 
+                    chatarea.innerHTML = "<b>" + getNiceName(sender) + ": </b>" + msg + "<br/>" + chatarea.innerHTML;
                 }
             }
         }
@@ -315,12 +343,15 @@
         }
         function showTab(otherAddr) {
             toAddr = otherAddr;
-            if (otherAddr) {
+            if (otherAddr) {                
                 createDirectMessageTab(otherAddr.toLowerCase()); // create button if dont have
                 chatarea_direct.innerHTML = "";
-                for (msg of direct_messages) {
 
-                    if ((msg.to) && msg.from === otherAddr.toLowerCase()) {
+                document.querySelectorAll("[class='tab-content']").forEach((b) => { b.style.background = "" });
+                document.querySelector("[id='"+otherAddr.toLowerCase()+"']").style.background = "lightblue";
+
+                for (msg of direct_messages) {
+                    if (isMe(msg.to) && msg.from === otherAddr.toLowerCase()) {
                         chatarea_direct.innerHTML = "<b>" + getNiceName(msg.from) + ": </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
                     } else if (isMe(msg.from) && msg.to === otherAddr.toLowerCase()) {
                         chatarea_direct.innerHTML = "<b>Me: </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
@@ -331,6 +362,9 @@
 
                 chatbox.placeholder = "Messaging " + otherAddr;
             } else {
+                // world
+                document.querySelectorAll("[class='tab-content']").forEach((b) => { b.style.background = "" });
+                document.querySelector("[class='tab-content']").style.background = "lightblue";
                 chatarea.style.display = '';
                 chatarea_direct.style.display = 'none';
                 chatbox.placeholder = "Messaging World";
@@ -422,7 +456,7 @@
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 4, 0, 0, 1],
@@ -556,7 +590,7 @@
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
-                if (auction_painting_id == 0) {
+                if (auction_painting_id <= 0) {
                     paintingInfo.innerHTML = "No Auction Currently. Please wait for next auction";
                     auctionInfo.style.display = 'none'; // only visible if auction
                 } else {
@@ -776,13 +810,108 @@
             return extra;
         }
 
+        const light = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(light);
+
+        // load auctioner
+        let action_auction;
+        let mixer_auction;
+        let model_auction;
+        glbLoader.load('assets/auction.glb', (gltf) => {
+            model_auction = gltf.scene;
+
+            // Scale and position the model
+            model_auction.scale.set(0.5, 0.5, 0.5);
+            model_auction.position.set(-3.2, 0, 4)
+            model_auction.rotation.y = -3.5
+
+            // Create the rostrum geometry (You can customize the dimensions)
+            const rostrumGeometry = new THREE.BoxGeometry(0.2, 2.3, 0.1);
+            const rostrumMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+            // Create the rostrum mesh by combining the geometry and material
+            const rostrum = new THREE.Mesh(rostrumGeometry, rostrumMaterial);
+            // Position the rostrum
+            rostrum.position.set(0, 0, 0.5);
+            model_auction.add(rostrum); //0x8B4513
+
+            // Load animations
+            mixer_auction = new THREE.AnimationMixer(model_auction);
+            gltf.animations.forEach((clip) => {
+                const action = mixer_auction.clipAction(clip);
+                if (!action_auction) { // just set if only 1
+                    action_auction = action;
+                    action_auction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
+                }
+
+            });
+            // Add the model to the scene if auction there            
+            model_auction.visible = auction_painting_id > 0; // false;
+            if (auction_painting_id > 0) {
+                loadAuctionPainting(auction_painting_id);
+            }
+
+            scene.add(model_auction);
+        });
+        // load fake audience for auction (super lag for more )
+        load_fake_audience = false;
+        if (load_fake_audience) {
+            for (i = 0; i < 1; i++) {
+                let x = -1 - 0.6 * i; // declared so will be passed correctly
+                glbLoader.load('assets/auction.glb', (gltf, i) => {
+                    model_audience = gltf.scene;
+                    // Scale and position the model
+                    model_audience.scale.set(0.5, 0.5, 0.5);
+                    model_audience.position.set(x, 0, 3.09)
+                    //model_auction.rotation.y = 0
+                    // Add the model to the scene
+                    scene.add(model_audience);
+                });
+            }
+        }
+
         character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
-        const glbLoader2 = new THREE.GLTFLoader();
+        //const glbLoader2 = new THREE.GLTFLoader();
+        const MAX_CHARACTERS = 15;
+        for (i = 0; i < MAX_CHARACTERS; i++) {
+            const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
+            const inFile = 'assets/' + character_choices[choice] + '.glb'
+            //console.log('choice is ' + choice);
+            glbLoader.load(inFile, (gltf) => {
+                otherCharacter = gltf.scene;
+                otherCharacters.push(otherCharacter);
+                mixer = new THREE.AnimationMixer(otherCharacter);
+                otherMixers.push(mixer);
+
+                let otherAction;
+                //otherAction = mixer.clipAction(gltf.animations[0]);
+                for (clip of gltf.animations) {
+                    action = mixer.clipAction(clip);
+                    if (!otherAction) {
+                        otherAction = action;
+                    } else if (clip.name === 'Walk') { // Change to the correct walk animation name if got
+                        otherAction = action;
+                    }
+                }
+                otherAction.setLoop(THREE.LoopRepeat);
+                otherActions.push(otherAction);
+                otherCharacter.scale.set(0.3, 0.3, 0.3);
+                scene.add(otherCharacter);
+
+                if (otherCharacters.length == MAX_CHARACTERS) {
+                    for (i = 0; i < fakePlayers; i++) {
+                        fakePlayerMeshs.push(otherCharacters[i]);
+                        otherCharacters[i].position.set(-4 + Math.random() * 4, 0.1, -1 + Math.random() * 4);
+                    }
+                }
+            });
+        }
+        character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
+        //glbLoader2 = new THREE.GLTFLoader();
         for (i = 0; i < 7; i++) {
             const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
             const inFile = 'assets/' + character_choices[choice] + '.glb'
             //console.log('choice is ' + choice);
-            glbLoader2.load(inFile, (gltf) => {
+            glbLoader.load(inFile, (gltf) => {
                 otherCharacter = gltf.scene;
                 otherCharacters.push(otherCharacter);
                 mixer = new THREE.AnimationMixer(otherCharacter);
@@ -811,76 +940,6 @@
                 }
             });
         }
-
-
-
-        const light = new THREE.AmbientLight(0xffffff, 2);
-        scene.add(light);
-
-        // load auctioner
-        let action_auction;
-        let mixer_auction;
-        let model_auction;
-        glbLoader.load('assets/auction.glb', (gltf) => {
-            model_auction = gltf.scene;
-
-            // Scale and position the model
-            model_auction.scale.set(0.5, 0.5, 0.5);
-            model_auction.position.set(-3.2, 0, 4)
-            model_auction.rotation.y = -3.5
-
-            // Create the rostrum geometry (You can customize the dimensions)
-            const rostrumGeometry = new THREE.BoxGeometry(0.2, 2.3, 0.1);
-            const rostrumMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-            // Create the rostrum mesh by combining the geometry and material
-            const rostrum = new THREE.Mesh(rostrumGeometry, rostrumMaterial);
-            // Position the rostrum
-            rostrum.position.set(0, 0, 0.5);
-            model_auction.add(rostrum); 0x8B4513
-
-            // Load animations
-            mixer_auction = new THREE.AnimationMixer(model_auction);
-            gltf.animations.forEach((clip) => {
-                const action = mixer_auction.clipAction(clip);
-                if (!action_auction) { // just set if only 1
-                    action_auction = action;
-                    action_auction.setLoop(THREE.LoopRepeat); // Set the walk animation to loop
-                }
-
-            });
-            // add light as very dark
-            /*var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-            hemiLight.position.set(0, 10, 0);
-            scene.add(hemiLight);*/
-
-            /*// add light as very dark
-            var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-            hemiLight.position.set(0, 10, 0);
-            scene.add(hemiLight);*/
-
-            // Add the model to the scene
-            model_auction.visible = false;
-            scene.add(model_auction);
-
-        });
-        // load fake audience for auction (super lag for more )
-        load_fake_audience = false;
-        if (load_fake_audience) {
-            for (i = 0; i < 1; i++) {
-                let x = -1 - 0.6 * i; // declared so will be passed correctly
-                glbLoader.load('assets/auction.glb', (gltf, i) => {
-                    model_audience = gltf.scene;
-                    // Scale and position the model
-                    model_audience.scale.set(0.5, 0.5, 0.5);
-                    model_audience.position.set(x, 0, 3.09)
-                    //model_auction.rotation.y = 0
-                    // Add the model to the scene
-                    scene.add(model_audience);
-                });
-            }
-        }
-
-
 
         // to fix
         function createCharacter2(geoChoice, colorChoice, pos, ry) {
@@ -974,12 +1033,17 @@
         document.addEventListener('touchend', onTouchEnd);
         function onTouchStart(event) {
             //  event.preventDefault();
+            if (event.target && (event.target.tagName.toLowerCase() == "button"
+                || event.target.tagName.toLowerCase() == "input")) {
+                // don't move when click on button
+                return;
+            }
             const touch = event.touches[0];
 
             // Calculate touch movement distance from the center of the circle
             const deltaX = touch.clientX - window.innerWidth / 2;
             const deltaY = touch.clientY - window.innerHeight / 2;
-            const threshold = 120;
+            const threshold = 80;
             //console.log(deltaY)
             if (deltaY < -threshold) {
                 moveForward = true;
@@ -1135,11 +1199,11 @@
                 textLabel.visible = true;
             }
             //outer space
-            earth.rotation.y += .0009;
+            earth.rotation.y += 0.01// .0009;
             theta += dTheta;
             moon.position.x = r * Math.cos(theta);
             moon.position.z = r * Math.sin(theta);
-            
+
             renderer.render(scene, camera);
             //cssRenderer.render(scene, camera);
             //controls.update();

@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-var Web3 = require('web3'); // for unregistered user to see painting info and auction
+//var Web3 = require('web3'); // for unregistered user to see painting info and auction
 
 const server = new WebSocket.Server({ port: 8080 });
 const clients = new Set();
@@ -7,8 +7,6 @@ const client2positions = {};
 const positions = {};
 const direct_messages = [];
 id = 0;
-
-var web3 = new Web3(Web3.givenProvider) 
 
 server.on('connection', (client) => {
   console.log('Client connected');
@@ -39,6 +37,7 @@ server.on('connection', (client) => {
       if(data.msg === kick){
         console.log("kick code detected for " + toAddr);
         delete positions[toAddr];
+        return; // dont store
       }
 
       direct_messages.push(

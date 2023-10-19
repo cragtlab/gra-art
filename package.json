@@ -13,16 +13,18 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "hardhat": "^2.17.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "5.0.0",
     "three": "^0.137.5",
     "truffle": "^5.11.5",
     "truffle-plugin-verify": "^0.6.5",
     "vite": "^4.4.11",
+    "web3": "^1.7.0"
+  },
+  "not_used": {
+    "ws": "^8.14.2",
     "web-vitals": "^2.1.4",
-    "web3": "^1.7.0",
-    "ws": "^8.14.2"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "5.0.0"
   },
   "scripts": {
     "start": "node src/server.js",

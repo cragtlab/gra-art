@@ -49,14 +49,20 @@ function connect() {
             }
         } else if (message.type === "dm_messages") {
             //console.log("processing dm wih "+ accounts[0]);
+            if(!accounts && !unregistered_name){
+                // ignore until got name or account at start                
+                return;
+            }
             if (direct_messages.length != message.data.length) {
-                i = direct_messages.length; // get first before set
+                let i = direct_messages.length; // get first before set. also be careful i affected by showtab
                 direct_messages = message.data; // set first then will display
-                for (i; i < message.data.length; i++) {
+                for (; i < message.data.length; i++) {
                     msg = message.data[i];
+                    
                     //console.log("process new DM: ");
                     //console.log(msg);
-
+                    //console.log(isMe(msg.to) || isMe(msg.from));
+                    
                     if (isMe(msg.to)) {
                         showTab(msg.from);
                     } else if (isMe(msg.from)) {
@@ -111,6 +117,7 @@ function tryUnregisteredName(takenName) {
 
 // return true if got accounts[0] is me or is unregistered_name 
 function isMe(address) {
+    //console.log(address+" isME? " + accounts + " // " + unregistered_name)    
     if (accounts && accounts.length > 0) {
         return address === accounts[0].toLowerCase();
     }

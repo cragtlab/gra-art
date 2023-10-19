@@ -31,10 +31,18 @@ async function clickConnect() {
         paintingAddress = contractJSON.networks[networkId].address;
         contractX = await new web3x.eth.Contract(contractJSON.abi, paintingAddress);
 
-        web3Paintings = await contractX.methods.getPaintings().call()
-
+        web3Paintings = await contractX.methods.getPaintings().call();
         web3Names = await contractX.methods.getNames().call(); // getNames
-        loadAuctionPainting(await contractX.methods.getAuctionPaintingID().call());// getAuctionPaintingID());
+        
+        try{
+            auction_painting_id = await contractX.methods.getAuctionPaintingID().call();
+            loadAuctionPainting(await contractX.methods.getAuctionPaintingID().call());// getAuctionPaintingID());
+        }catch(ex){
+            
+            // mobile load the auction slower so need this. code in gltf loader to show 
+        }
+        
+        
         // store array into names[wallet_address] map
         /* cannot 
             /*
@@ -94,7 +102,7 @@ async function refreshData() {
 
 function getNiceName(walletAddress) {
     if (!web3Names) {
-        console.log("what is this");
+        //console.log("what is this");
         if (walletAddress.length > 5) {
             return walletAddress.substring(0, 5) + "..";
         }
