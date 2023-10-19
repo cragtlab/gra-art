@@ -9,8 +9,6 @@
 - [Ganache](https://www.trufflesuite.com/ganache) (For Local Blockchain)
 - [MetaMask](https://metamask.io/) (Ethereum Wallet)
 - [ThreeJS](https://threejs.org/docs/index.html) (3D Javascript library)
-- [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction) (React renderer for Three.js)
-- [@react-three/drei](https://docs.pmnd.rs/drei/introduction) (Extra helpers for React-Three-Fiber)
 
 ## Requirements For Initial Setup
 - Install [NodeJS](https://nodejs.org/en/), I recommend using node version v14 or v16 to avoid any potential dependency issues
@@ -40,14 +38,14 @@ npx ganache-cli
 `$ truffle test`
 
 ### 5. Start Frontend
-`$ npm start`
+`$ npm start`  
+`$ npm run web`
 
 ### 6. Update Metamask Network 
 For Ganache
 * Add local Ganache https://chainlist.org/?search=ganache&testnets=true
 * Import private keys of ganache server into metamask
 For Polygon Testnet
-* npm install @truffle/hdwallet-provider
 * npx truffle migrate --reset --network matic
 * npx truffle migrate --reset --network matic --compile-none (if got 32603 error with above)
 * Open index.html with Live Server  (npx run web)
