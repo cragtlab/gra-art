@@ -63,7 +63,7 @@ function changeName() {
 function getVIP() {
     vipContract.methods.mint(accounts[0]).send({ from: accounts[0] }).then(function (result) {
         vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
-            if (result2 == 1) {
+            if (result2 > 0 ) {
                 alert("Congratulations, you are now a VIP");
             } else {
                 alert("Failed to Become VIP. Please try again"); // maybe user cancel

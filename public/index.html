@@ -343,12 +343,12 @@
         }
         function showTab(otherAddr) {
             toAddr = otherAddr;
-            if (otherAddr) {                
+            if (otherAddr) {
                 createDirectMessageTab(otherAddr.toLowerCase()); // create button if dont have
                 chatarea_direct.innerHTML = "";
 
                 document.querySelectorAll("[class='tab-content']").forEach((b) => { b.style.background = "" });
-                document.querySelector("[id='"+otherAddr.toLowerCase()+"']").style.background = "lightblue";
+                document.querySelector("[id='" + otherAddr.toLowerCase() + "']").style.background = "lightblue";
 
                 for (msg of direct_messages) {
                     if (isMe(msg.to) && msg.from === otherAddr.toLowerCase()) {
@@ -705,7 +705,7 @@
             if (accounts && accounts.length > 0) {
                 vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result) {
                     console.log("result: " + result);
-                    if (result == 1) {
+                    if (result > 0) { // own at least 1
                         moveY = true;
                         exitedLift = false;
                     } else if (!showBuyVIPAlready) {
@@ -868,6 +868,40 @@
                 });
             }
         }
+
+        // dinosaur
+        glbLoader.load('assets/dino.glb', (gltf) => {
+            model_dino = gltf.scene;
+
+            // Scale and position the model
+            model_dino.scale.set(0.5, 0.5, 0.5);
+            model_dino.position.set(2.6, 0, -0.88)
+            model_dino.rotation.y = 0.29
+
+            // Load animations
+            m = new THREE.AnimationMixer(model_dino);
+            otherMixers.push(m);
+            otherActions.push(m.clipAction(gltf.animations[1]));
+
+            scene.add(model_dino);
+        });
+        let model_spaceman;
+        glbLoader.load('assets/spaceman.glb', (gltf) => {
+            model_spaceman = gltf.scene;
+
+            // Scale and position the model
+            model_spaceman.scale.set(0.25, 0.25, 0.25);
+
+            model_spaceman.position.set(3.2, 0.7, 2, 3)
+            model_spaceman.rotation.y = 4.4
+
+            // Load animations
+            m = new THREE.AnimationMixer(model_spaceman);
+            otherMixers.push(m);
+            otherActions.push(m.clipAction(gltf.animations[2]));
+
+            scene.add(model_spaceman);
+        });
 
         character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
         //const glbLoader2 = new THREE.GLTFLoader();
@@ -1032,6 +1066,8 @@
         document.addEventListener('touchmove', onTouchMove);
         document.addEventListener('touchend', onTouchEnd);
         function onTouchStart(event) {
+            //console.log("ontouch" + event)
+            //console.log(event.target);
             //  event.preventDefault();
             if (event.target && (event.target.tagName.toLowerCase() == "button"
                 || event.target.tagName.toLowerCase() == "input")) {
@@ -1204,6 +1240,9 @@
             moon.position.x = r * Math.cos(theta);
             moon.position.z = r * Math.sin(theta);
 
+            if (model_spaceman) {
+                model_spaceman.rotation.x += 0.01;
+            }
             renderer.render(scene, camera);
             //cssRenderer.render(scene, camera);
             //controls.update();
