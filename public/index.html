@@ -869,13 +869,15 @@
             }
         }
 
+     
+      
         // dinosaur
         glbLoader.load('assets/dino.glb', (gltf) => {
             model_dino = gltf.scene;
 
             // Scale and position the model
             model_dino.scale.set(0.5, 0.5, 0.5);
-            model_dino.position.set(2.6, 0, -0.88)
+            model_dino.position.set(3.4, 0, -0.88)
             model_dino.rotation.y = 0.29
 
             // Load animations
@@ -883,6 +885,20 @@
             otherMixers.push(m);
             otherActions.push(m.clipAction(gltf.animations[1]));
 
+            /*
+            // load a sound and set it as the PositionalAudio object's buffer
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load('public/assets/trex.wav', function (buffer) {
+                const sound = new THREE.PositionalAudio(listener);
+                sound.setBuffer(buffer);
+                sound.setLoop(true);
+                sound.setRefDistance(50);
+                //sound.setVolume( 0.5 );
+
+                sound.play();
+                
+                model_dino.add(sound);
+            });*/
             scene.add(model_dino);
         });
         let model_spaceman;
@@ -1010,6 +1026,10 @@
         }
         // Initialize the camera for third-person view
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // trex
+        //const listener = new THREE.AudioListener();
+        //camera.add(listener);
+
         // Animation parameters
         const movementSpeed = 0.03;
         var camY = 0.2;
