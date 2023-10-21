@@ -26,9 +26,11 @@ let highestBidAmount = 0;
 let lastBidAnnouncement = "0";
 function loadAuctionDiv() {
     // Announce the current bid every X seconds if text-to-speech is enabled
-    textToSpeechInterval = setInterval(() => {
-        timeToAnnounce = true;
-    }, 10000);
+    if (!textToSpeechInterval) {
+        textToSpeechInterval = setInterval(() => {
+            timeToAnnounce = true;
+        }, 10000);
+    }
 
     setInterval(async function () { // should listen event instead
         const bidHistoryElement = document.getElementById('bidHistory');
@@ -101,7 +103,7 @@ function loadAuctionDiv() {
             }
 
         }
-    }, 200);
+    }, 300);
     function speak(text) {
         utterance.text = text;
         window.speechSynthesis.speak(utterance);
