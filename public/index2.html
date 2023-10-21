@@ -87,7 +87,11 @@
             out = "Congratulations. Auction ended with your winning bid of " + highestBidAmount;
             ended_auction.style.display = '';
           } else {
-            out = "Bidded ended with highest bid: " + highestBidAmount;
+            if (highestBidAmount) {
+              out = "Auction ended with highest bid: " + highestBidAmount;
+            } else {
+              out = "Auction ended without any bidder";
+            }
             ended_auction.style.display = 'none';
           }
         }
@@ -114,7 +118,7 @@
       }
     }, 100);
     function speak(text) {
-      utterance.text=text;
+      utterance.text = text;
       window.speechSynthesis.speak(utterance);
     }
     function testAllVoices() {

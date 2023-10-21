@@ -37,7 +37,26 @@
             font-size: 18px;
         }
 
-        #paintingInfo {}
+        #paintingInfo>input, #live_auction>button {
+            background-color: #DAA520;
+            /* Use a gold or metallic color to evoke a sense of luxury. */
+            color: #fff;
+            /* White text for high contrast and readability. */
+            border: none;
+            border-radius: 5px;
+            /* Rounded corners for a softer look. */
+            font-size: 18px;
+            /* A slightly larger font size for prominence. */
+            text-transform: uppercase;
+            /* Uppercase text for a formal touch. */
+            letter-spacing: 1px;
+            /* Spacing between letters for a refined appearance. */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            /* Smooth color transition on hover. */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow for depth. */
+        }
 
         #chatbox {
             background-color: rgba(255, 255, 255, 0.9);
@@ -485,9 +504,10 @@
         wallTexture.offset.set(0, 0);
         wallTexture.repeat.set(1, 1); // 1 seem good enough
         const wallMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
+        //let wallTexture2 = new THREE.TextureLoader().load("OfficeCeiling005_4K_Roughness.jpg");
+        //const wallMaterial2 = new THREE.MeshBasicMaterial({ map: wallTexture2, side: THREE.DoubleSide });
 
-
-        let auction_painting;
+        let auction_painting, frame_mesh, curtain;
         let auction_painting_id = -1;
         paintings = [];
         const wallSize = 1; // Adjust the size of maze walls as needed
@@ -514,26 +534,48 @@
                     }
 
                     scene.add(painting);
-                } else if (mazeMatrix[row][col] === 4) {
-                    const paintingGeometry = new THREE.PlaneGeometry(2, 2); // Adjust size as needed
+                } else if (mazeMatrix[row][col] === 4) { // auction, assume 1st floor only
+                    painting_size = 2; // auction size
+                    const paintingGeometry = new THREE.PlaneGeometry(painting_size, painting_size); // Adjust size as needed
                     const adjustType = 1;
                     const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide }); // black first until contract load?
                     auction_painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
                     auction_painting.position.set(col - mazeMatrix.length / 2, 1.4, row - mazeMatrix[row].length / 2 + painting_zAdjust * adjustType); // Adjust position so it's in front of the wall
                     auction_painting.rotation.y = -Math.PI;
                     scene.add(auction_painting);
+                    // frame for painting
+                    const frameGeometry = new THREE.PlaneGeometry(painting_size + 0.4, painting_size + 0.4);
+                    const frameTexture = new THREE.TextureLoader().load('public/assets/frame.jpg');
+                    const frameMaterial = new THREE.MeshBasicMaterial({ map: frameTexture, side: THREE.DoubleSide });
+                    frame_mesh = new THREE.Mesh(frameGeometry, frameMaterial);
+                    frame_mesh.position.set(auction_painting.position.x, auction_painting.position.y, auction_painting.position.z + 0.001);
+                    frame_mesh.rotation.y = -Math.PI;
+                    scene.add(frame_mesh);
+                    // curtain instead of blackness
+                    const curtainGeometry = new THREE.PlaneGeometry(painting_size, painting_size);
+                    const curtainTexture = new THREE.TextureLoader().load('public/assets/curtain.avif');
+                    const curtainMaterial = new THREE.MeshBasicMaterial({ map: curtainTexture, side: THREE.DoubleSide });
+                    curtain = new THREE.Mesh(curtainGeometry, curtainMaterial);
+                    curtain.rotation.y = -Math.PI;
+                    curtain.position.set(auction_painting.position.x, auction_painting.position.y, auction_painting.position.z - 0.01);
+
+                    scene.add(curtain);
+
+
+
                 }
             }
         }
         function loadAuctionPainting(id) {
-
             auction_painting_id = id;
             if (auction_painting_id > 0) {
                 model_auction.visible = true;
+                curtain.visible = false;
                 const paintingTexture = new THREE.TextureLoader().load('assets/' + (auction_painting_id) + '.png'); // Load your painting image
                 auction_painting.material = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
             } else {
                 model_auction.visible = false;
+                curtain.visible=true;
                 auction_painting.material = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide });
             }
         }
@@ -677,6 +719,8 @@
 
                             if (painting.list_price === "0" || painting.list_price == 0) { // not listed yet
                                 button.value = "List for Sale";
+                            } else if (painting.list_price === "-1" || painting.list_price == -1) { // in auction
+                                button.value = "Painting In Auction"; // can update but not mentioned
                             } else {
                                 button.value = "Listed for " + painting.list_price + ". Update List Price (0 to unlist)";
                             }
@@ -869,8 +913,8 @@
             }
         }
 
-     
-      
+
+
         // dinosaur
         glbLoader.load('assets/dino.glb', (gltf) => {
             model_dino = gltf.scene;

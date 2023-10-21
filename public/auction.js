@@ -1,6 +1,6 @@
 const utterance = new SpeechSynthesisUtterance();
 utterance.rate = 1.5;
-window.speechSynthesis.onvoiceschanged = () =>{ 
+window.speechSynthesis.onvoiceschanged = () => {
     for (voice of window.speechSynthesis.getVoices()) {
         if (voice.name == "Google UK English Male") {
             utterance.voice = voice;
@@ -72,7 +72,11 @@ function loadAuctionDiv() {
                     out = "Congratulations. Auction ended with your winning bid of " + highestBidAmount;
                     ended_auction.style.display = '';
                 } else {
-                    out = "Bidded ended with highest bid: " + highestBidAmount;
+                    if (highestBidAmount) {
+                        out = "Auction ended with highest bid: " + highestBidAmount;
+                    } else {
+                        out = "Auction ended without any bidder";
+                    }
                     ended_auction.style.display = 'none';
                 }
             }
@@ -141,5 +145,5 @@ function loadAuctionDiv() {
         speak(msgs[randomIndex]);
     }
 
-    
+
 }
