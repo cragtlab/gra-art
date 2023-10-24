@@ -42,7 +42,8 @@ Add 2 person to block 2nd level
             font-size: 18px;
         }
 
-        #paintingInfo>input, #live_auction>button {
+        #paintingInfo>input,
+        #live_auction>button {
             background-color: #DAA520;
             /* Use a gold or metallic color to evoke a sense of luxury. */
             color: #fff;
@@ -223,7 +224,7 @@ Add 2 person to block 2nd level
         <w3m-core-button></w3m-core-button>
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
         <button id="changeNameBtn" style="display:none" onclick="changeName()">Change Name</button>
-        <button id="getVIPBtn" style="display:none" onclick="getVIP()">Get VIP</button>
+        <button id="getVIPBtn" style="display:none" onclick="getVIP()">🌟Get VIP</button>
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
@@ -234,7 +235,7 @@ Add 2 person to block 2nd level
             <span id="live_auction" style='display:none'>
                 <label for="bidAmount">Enter Bid: $</label>
                 <input type="number" id="bidAmount" min="0" step="1">
-                <br/><button onclick="placeBid()">Place Bid</button>
+                <br /><button onclick="placeBid()">Place Bid</button>
                 <button onclick="placeBidHigher()">Place Higher Bid</button>
             </span>
             <span id="ended_auction" style='display:none'>
@@ -580,7 +581,7 @@ Add 2 person to block 2nd level
                 auction_painting.material = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
             } else {
                 model_auction.visible = false;
-                curtain.visible=true;
+                curtain.visible = true;
                 auction_painting.material = new THREE.MeshBasicMaterial({ color: 0x00000, side: THREE.DoubleSide });
             }
         }
@@ -761,11 +762,11 @@ Add 2 person to block 2nd level
                         showBuyVIPAlready = true;
                         //character.position.set(-2.9, 0, 0.94);
                         //character.rotation.y = -1.7;
-                        m = startMarquee("System: Only VIPs can enter the lift to level 2. Buy one to enjoy our lifetime VIP benefits.");
+                        m = startMarquee("System: Buy a Fan Token to enter VIP area at level 2");
                         m.addEventListener('animationend', () => {
                             showBuyVIPAlready = false;
                         });
-                        chatarea.innerHTML = "<b>System: </b> Only VIP can enter the lift to level 2. <a href='#' onclick='alert(\"trigger Mint NFT\")'>Buy one now!</a><br/>"
+                        chatarea.innerHTML = "<b>System: </b> <a href='#' onclick='alert(\"trigger Mint NFT\")'>Buy a Fan Token</a> to enter the VIP area at level 2<br/>"
                             + chatarea.innerHTML;
 
                     }
@@ -775,11 +776,11 @@ Add 2 person to block 2nd level
                 // unregistered user cannot go up too
                 //character.position.set(-2.9, 0, 0.94);
                 //character.rotation.y = -1.7;
-                m = startMarquee("System: Only VIPs can enter the lift to level 2. Login with a wallet and buy one to enjoy our lifetime VIP benefits.");
+                m = startMarquee("System: Buy a Fan Token to enter level 2.");
                 m.addEventListener('animationend', () => {
                     showBuyVIPAlready = false;
                 });
-                chatarea.innerHTML = "<b>System: </b> Only VIP can enter the lift to level 2. Buy one now!<br/>"
+                chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter level 2. Login with your wallet and get one now<br/>"
                     + chatarea.innerHTML;
 
             }
@@ -918,8 +919,21 @@ Add 2 person to block 2nd level
             }
         }
 
+        let model_bouncer;
+        glbLoader.load('assets/bouncer.glb', (gltf) => {
+            model_bouncer = gltf.scene;
 
+            // Scale and position the model
+            model_bouncer.scale.set(0.4, 0.4, 0.4);
+            model_bouncer.position.set(-3.6, 0, 0.096)
+            model_bouncer.rotation.y = 1.15
 
+            // Load animations
+            m = new THREE.AnimationMixer(model_bouncer);
+            otherMixers.push(m);
+            otherActions.push(m.clipAction(gltf.animations[0]));
+            scene.add(model_bouncer);
+        });
         // dinosaur
         glbLoader.load('assets/dino.glb', (gltf) => {
             model_dino = gltf.scene;
@@ -968,7 +982,8 @@ Add 2 person to block 2nd level
             scene.add(model_spaceman);
         });
 
-        character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
+        character_choices = ["1", "1", "4", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
+        // 1 is lady, 4 is old man, 5 is suit girl, 6 is child
         //const glbLoader2 = new THREE.GLTFLoader();
         const MAX_CHARACTERS = 15;
         for (i = 0; i < MAX_CHARACTERS; i++) {

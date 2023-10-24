@@ -26,7 +26,7 @@ let highestBidAmount = 0;
 let lastBidAnnouncement = "0";
 function loadAuctionDiv() {
     // Announce the current bid every X seconds if text-to-speech is enabled
-    if (!textToSpeechInterval) {
+    if (typeof(textToSpeechInterval) == 'undefined') {
         textToSpeechInterval = setInterval(() => {
             timeToAnnounce = true;
         }, 10000);

@@ -48,7 +48,7 @@ contract Painting is ERC721Royalty {
         addPainting("Life Is Good", creator, 0);
         addPainting("Adventures Await", creator, 0);
         addPainting("Journey On", creator, 0);
-        addPainting("Speed Up", creator, 0);
+        addPainting("Evening Autumn", creator, 0);
         addPainting(
             "Fast Train",
             address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6),
