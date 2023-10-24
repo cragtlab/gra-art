@@ -1,6 +1,11 @@
 <!--
     mobile can chat and move?
-    
+1st VIP to intro, 2nd screen non-Fan to buy Fan token
+3rd Buy fixed price, 
+4th start auction  -  CC, 
+Chatting with others    
+
+Add 2 person to block 2nd level
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -229,7 +234,7 @@
             <span id="live_auction" style='display:none'>
                 <label for="bidAmount">Enter Bid: $</label>
                 <input type="number" id="bidAmount" min="0" step="1">
-                <button onclick="placeBid()">Place Bid</button>
+                <br/><button onclick="placeBid()">Place Bid</button>
                 <button onclick="placeBidHigher()">Place Higher Bid</button>
             </span>
             <span id="ended_auction" style='display:none'>
@@ -722,7 +727,7 @@
                             } else if (painting.list_price === "-1" || painting.list_price == -1) { // in auction
                                 button.value = "Painting In Auction"; // can update but not mentioned
                             } else {
-                                button.value = "Listed for " + painting.list_price + ". Update List Price (0 to unlist)";
+                                button.value = "Listed for " + painting.list_price; // + ". Update List Price (0 to unlist)";
                             }
 
 
