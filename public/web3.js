@@ -33,16 +33,16 @@ async function clickConnect() {
 
         web3Paintings = await contractX.methods.getPaintings().call();
         web3Names = await contractX.methods.getNames().call(); // getNames
-        
-        try{
+
+        try {
             auction_painting_id = await contractX.methods.getAuctionPaintingID().call();
             loadAuctionPainting(await contractX.methods.getAuctionPaintingID().call());// getAuctionPaintingID());
-        }catch(ex){
-            
+        } catch (ex) {
+
             // mobile load the auction slower so need this. code in gltf loader to show 
         }
-        
-        
+
+
         // store array into names[wallet_address] map
         /* cannot 
             /*
@@ -55,15 +55,22 @@ async function clickConnect() {
     vipJSON = await fetchJSON("/src/abis/VIPNFT.json");
     vipContract = await new web3.eth.Contract(vipJSON.abi, vipJSON.networks[networkId].address);
 
+  
     refreshData();
 }
 function changeName() {
     addName();
 }
+function checkVIP() {
+    vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
+        return result2 > 0
+    });
+}
+
 function getVIP() {
     vipContract.methods.mint(accounts[0]).send({ from: accounts[0] }).then(function (result) {
         vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
-            if (result2 > 0 ) {
+            if (result2 > 0) {
                 alert("Congratulations, you are now a VIP");
             } else {
                 alert("Failed to Become VIP. Please try again"); // maybe user cancel
@@ -85,13 +92,13 @@ async function refreshData() {
         connectBtn.textContent = getNiceName(accounts[0]);
         changeNameBtn.style.display = '';
         vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result2) {
-            if (result2 == 1) {
+            if (result2 > 0) {
                 getVIPBtn.style.display = '';
-                getVIPBtn.name = 'You are VIP!';
+                getVIPBtn.innerHTML = '🌟VIP🌟';
                 getVIPBtn.disabled = 'disabled';
             } else {
                 getVIPBtn.style.display = '';
-                getVIPBtn.name = 'Get VIP';
+                getVIPBtn.innerHTML = 'Get VIP';
                 getVIPBtn.disabled = '';
             }
 

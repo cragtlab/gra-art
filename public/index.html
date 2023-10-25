@@ -42,6 +42,16 @@ Add 2 person to block 2nd level
             font-size: 18px;
         }
 
+        @keyframes swipe {
+            0% {
+                right: -50px
+            }
+
+            100% {
+                right: 20px;
+            }
+        }
+
         #paintingInfo>input,
         #live_auction>button {
             background-color: #DAA520;
@@ -224,7 +234,7 @@ Add 2 person to block 2nd level
         <w3m-core-button></w3m-core-button>
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
         <button id="changeNameBtn" style="display:none" onclick="changeName()">Change Name</button>
-        <button id="getVIPBtn" style="display:none" onclick="getVIP()">🌟Get VIP</button>
+        <button id="getVIPBtn" style="display:none" onclick="getVIP()">Get VIP</button>
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
@@ -638,6 +648,10 @@ Add 2 person to block 2nd level
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
+                paintingDetails.style.animation='swipe 3s';
+                paintingDetails.addEventListener('animationend', () => {
+                    paintingDetails.style.animation='';
+                });
                 if (auction_painting_id <= 0) {
                     paintingInfo.innerHTML = "No Auction Currently. Please wait for next auction";
                     auctionInfo.style.display = 'none'; // only visible if auction
@@ -645,7 +659,7 @@ Add 2 person to block 2nd level
                     paintingInfo.innerHTML =
                         "<a id='paintingName' target=_blank>Painting #" + auction_painting_id + "</a>"
                         + "<br/>Message Artist: <a href='#' id='creator'></a> ";
-                    auctionInfo.style.display = '';
+                    auctionInfo.style.display = ''; a
                     loadAuctionDiv();
                     //+ "<br/><iframe width=500 height=300 src=/public/index2.html></iframe>";
 
@@ -665,6 +679,10 @@ Add 2 person to block 2nd level
 
                 }
             } else if (raycaster.intersectObjects(paintings).length > 0) {
+                paintingDetails.style.animation='swipe 3s';
+                paintingDetails.addEventListener('animationend', () => {
+                    paintingDetails.style.animation='';
+                });
                 auctionInfo.style.display = 'none'; // only visible if auction
                 const clickedPainting = raycaster.intersectObjects(paintings)[0].object;
                 const clickedPaintingIndex = paintings.indexOf(clickedPainting);
