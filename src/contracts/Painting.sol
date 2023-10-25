@@ -85,7 +85,7 @@ contract Painting is ERC721Royalty {
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://QmZYxeVLcXS3NmMkJXZLX88GmYc19fqNqCLSBZXDMvazWg/";
+        return "ipfs://QmXyoc8kwjUvPqgJP3kQeLiSGS4wFnHt78JPs9AsYepGHd/";
         //"https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
     }
 
@@ -255,4 +255,9 @@ contract Painting is ERC721Royalty {
     function getPainting(uint256 _id) public view returns (Paint memory) {
         return paintings[_id - 1];
     }
+
+    /* withdraw money
+    function withdraw() public payable{
+        payable(msg.sender).transfer(address(this).balance);
+    }*/
 }

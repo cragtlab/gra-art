@@ -538,7 +538,7 @@ Add 2 person to block 2nd level
                 } else if (mazeMatrix[row][col] === 2 || mazeMatrix[row][col] === 3) {
                     const paintingGeometry = new THREE.PlaneGeometry(0.75, 0.75); // Adjust size as needed
                     const adjustType = (mazeMatrix[row][col] == 2 ? 1 : -1);
-                    const paintingTexture = new THREE.TextureLoader().load('assets/' + (paintings.length + 1) + '.png'); // Load your painting image
+                    const paintingTexture = new THREE.TextureLoader().load('assets/art/' + (paintings.length + 1) + '.png'); // Load your painting image
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
@@ -587,7 +587,7 @@ Add 2 person to block 2nd level
             if (auction_painting_id > 0) {
                 model_auction.visible = true;
                 curtain.visible = false;
-                const paintingTexture = new THREE.TextureLoader().load('assets/' + (auction_painting_id) + '.png'); // Load your painting image
+                const paintingTexture = new THREE.TextureLoader().load('assets/art/' + (auction_painting_id) + '.png'); // Load your painting image
                 auction_painting.material = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
             } else {
                 model_auction.visible = false;
@@ -606,7 +606,7 @@ Add 2 person to block 2nd level
                 } else if (level2Matrix[row][col] === 2 || level2Matrix[row][col] === 3) {
                     const paintingGeometry = new THREE.PlaneGeometry(0.75, 0.75); // Adjust size as needed
                     const adjustType = (level2Matrix[row][col] == 2 ? 1 : -1);
-                    const paintingTexture = new THREE.TextureLoader().load('assets/' + (paintings.length + 1) + '.png'); // Load your painting image
+                    const paintingTexture = new THREE.TextureLoader().load('assets/art/' + (paintings.length + 1) + '.png'); // Load your painting image
                     const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture, side: THREE.DoubleSide });
 
                     const painting = new THREE.Mesh(paintingGeometry, paintingMaterial);
@@ -648,7 +648,7 @@ Add 2 person to block 2nd level
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
-                paintingDetails.style.animation='swipe 3s';
+                paintingDetails.style.animation='swipe 1s';
                 paintingDetails.addEventListener('animationend', () => {
                     paintingDetails.style.animation='';
                 });

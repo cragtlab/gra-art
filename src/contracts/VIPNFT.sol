@@ -6,10 +6,12 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 contract VIPNFT is ERC1155 {
     uint256 public MAX_SUPPLY = 20;
     uint256 public minted = 0;
+    string public name = "Fan Token for GRA Art Gallery"; // for OpenSea to show instead of unidentified contract
+
 
     constructor()
         ERC1155(
-            "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata_VIP/{id}"
+            "ipfs://QmSPAsBPprhrdvLm1yq8G5upY2EpSZTrcpPdL6ic6dfinE/{id}"
         )
     {
         
