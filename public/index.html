@@ -44,7 +44,7 @@ Add 2 person to block 2nd level
 
         @keyframes swipe {
             0% {
-                right: -50px
+                right: -200px
             }
 
             100% {
@@ -648,7 +648,7 @@ Add 2 person to block 2nd level
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
-                paintingDetails.style.animation='swipe 1s';
+                paintingDetails.style.animation='swipe 0.5s';
                 paintingDetails.addEventListener('animationend', () => {
                     paintingDetails.style.animation='';
                 });
