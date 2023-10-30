@@ -36,7 +36,7 @@
                 return;
             }
 */
-let loaded = false, chooseCharacter = false;
+let loaded = false, currentChoice=1;
 xxx(); function xxx() {
     const canvas = document.getElementById('loadingCanvas');
     const ctx = canvas.getContext('2d');
@@ -125,17 +125,23 @@ xxx(); function xxx() {
 
     // Game loop
     function gameLoop() {
-        if(typeof(accounts) != 'undefined' && accounts[0]){
-            loaded=true;
-            explorerBtn.disabled ='disabled';
+        // wait for character Choice          
+        /*if (typeof(geoChoice) !='undefined' && geoChoice >= 0) {
+           loaded=true;
+        }*/
+        if (typeof (accounts) != 'undefined' && accounts[0]) {
+            loaded = true;
+            explorerBtn.disabled = 'disabled';
             //alert("yeah" + accounts[0]);
         }
         if (loaded) {
+            characterSelection.style.opacity = 100;
+            overlay.style.display='none';
+            //container.style.opacity = 0;
+        }
+        if(typeof(geoChoice) != 'undefined' && geoChoice >= 0){
             container.style.opacity = 0;
             return;
-        }
-        if (chooseCharacter) {
-
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -163,4 +169,43 @@ xxx(); function xxx() {
     }
 
     gameLoop();
+
+    var cards = document.querySelectorAll(".card");
+  
+    cards.forEach((card) => {
+        card.addEventListener("touchstart", cardSelected);
+        card.addEventListener("mouseclick", cardSelected);
+        //card.addEventListener("mouseout", stopAnimateCard);
+        //card.addEventListener("touchend", stopAnimateCard);
+        //card.addEventListener("touchcancel", stopAnimateCard);
+    });
+    function cardSelected(e) {
+        var cards = document.querySelectorAll(".card");
+        cards.forEach((card) => {
+            if (card === e.target) {
+                card.classList.remove("animated");
+                card.classList.add("active");
+                currentChoice = card.getAttribute("choice");
+
+            } else {
+                card.classList.remove("active");
+                x = setTimeout(function () {
+                    card.classList.add("animated");
+                }, 2500);
+            }
+        });
+
+
+        //alert(currentChoice);
+    }
+    function stopAnimateCard(e) {
+        // remove css, apply custom animation on end
+        var card = e.target;
+        if (!card.classList.contains("active")) {
+            card.classList.remove("animated");
+            x = setTimeout(function () {
+                card.classList.add("animated");
+            }, 2500);
+        }
+    }
 }

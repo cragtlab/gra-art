@@ -155,6 +155,10 @@ function sendMyPosition() {
     if (!character || (!accounts && !unregistered_name)) {
         return;
     }
+    // avatar not selected yet
+    if(geoChoice < 0){
+        return;
+    }
     if (socket.readyState != WebSocket.OPEN) {
         //connect();
         return;

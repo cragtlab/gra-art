@@ -15,6 +15,7 @@ Add 2 person to block 2nd level
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
 
     <title>GRA Art Gallery</title>
+    <link rel="stylesheet" href="cards.css">
     <style>
         body {
             margin: 0;
@@ -52,6 +53,7 @@ Add 2 person to block 2nd level
             }
         }
 
+        #characterSelection>center>button,
         #paintingInfo>input,
         #live_auction>button {
             background-color: #DAA520;
@@ -148,12 +150,17 @@ Add 2 person to block 2nd level
         }
 
         #container canvas,
-        #overlay {
+        #overlay, #characterSelection {
             background: beige;
             position: absolute;
             align-items: center;
             justify-content: center;
-
+        }
+        #characterSelection{
+            top: 200px; /* for qr code */
+            z-index: 99;
+            border-radius: 30px;
+            transition: opacity 2s;
         }
 
         /* emoji scrolling */
@@ -228,6 +235,16 @@ Add 2 person to block 2nd level
             <br /><b>OR</b>
             <br /><button onclick="loaded=true" style="width: 30%">Web3 Wallet User</button>
         </div>
+    </div>
+    <div id="characterSelection" style="opacity:0">
+        <center><h1>Choose Your Avatar</h1>
+        <section class="cards">
+            <div choice="6" class="card charizard animated"></div>
+            <div choice="4" class="card pika animated"></div>
+            <div choice="1" class="card eevee animated"></div>
+            <div choice="5" class="card mewtwo animated"></div>
+          </section>
+         <button onclick="geoChoice=currentChoice;characterSelection.style.display='none'">Confirm Your Avatar</button></center>
     </div>
     <div id="circle-overlay"></div>
     <div id="connectDiv">
@@ -307,6 +324,8 @@ Add 2 person to block 2nd level
         let direct_messages = [];
         const playerMeshs = [];
         const fakePlayerMeshs = [];
+        // v2 allow avatar selection and show to all
+        const otherCharactersV2 = {}; // addr -> empty (generating stage dont recreate) addr -> characterMesh
 
         chatbox.addEventListener('keydown', function (event) {
             if (event.keyCode === 13) {
@@ -407,11 +426,16 @@ Add 2 person to block 2nd level
 
             chatbox.focus();
         }
+        oldMethod = false; // old code of rendering live. too slow?
+        oldMethod2 = false; // random at all size and cap to 15
+        METHOD3 = true; // create on the fly (seem to lag too much)
+
         function renderPlayerPositions() {
             //clearExistingPlayers();
             fakePlayers = 0;
-            old = false; // old code of rendering live. too slow?
-            if (old) {
+
+            //oldMethod2 = false; // random rendering
+            if (oldMethod) {
                 while (mesh = playerMeshs.pop()) {
                     scene.remove(mesh);
                 }
@@ -420,10 +444,11 @@ Add 2 person to block 2nd level
                     //console.log(player.position);
                     playerMeshs.push(createCharacter_shape(player.geoChoice, player.colorChoice, player.position, player.ry));
                 }
-            } else {
-
+            } else if (oldMethod2) {
                 i = 0;
                 for (player of playerPositions) {
+                    // create temp if not yet
+                    character_model = otherCharactersV2[player.addr];
                     cModel = otherCharacters[fakePlayers + i];
                     if (!cModel) {
                         console.log("wait for cModel to load for index " + i)
@@ -440,6 +465,39 @@ Add 2 person to block 2nd level
                 // hide extra characters (not fake or real)
                 for (; i < otherCharacters.length; i++) {
                     otherCharacters[i].visible = false;
+                }
+            } else if (METHOD3) {
+                for (player of playerPositions) {
+                    // create temp if not yet
+                    character_model = otherCharactersV2[player.addr];
+                    if (!character_model) {
+                        otherCharactersV2[player.addr] = "temp";
+                        createCharacter2(player);
+                    } else if (character_model == "temp") {
+                    } else {
+                        // just update position
+                        character_model.position.set(player.position.x, player.position.y, player.position.z);
+                        character_model.rotation.y = player.ry; //Math.PI + player.ry for mesh[0];
+                    }
+                }
+                // remove those disconnected players
+                for (o_addr in otherCharactersV2) {
+                    found = false;
+                    for (player of playerPositions) {
+                        if (player.addr == o_addr) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+
+                        other_character = otherCharactersV2[o_addr];
+                        console.log("delete not found character " + o_addr + " with value " + other_character)
+                        delete otherCharactersV2[o_addr];
+                        if (other_character != "temp") {
+                            scene.remove(other_character); // might fail if "temp" but shoud be ok
+                        }
+                    }
                 }
             }
             //console.log(playerMeshs)
@@ -569,7 +627,7 @@ Add 2 person to block 2nd level
                     scene.add(frame_mesh);
                     // curtain instead of blackness
                     const curtainGeometry = new THREE.PlaneGeometry(painting_size, painting_size);
-                    const curtainTexture = new THREE.TextureLoader().load('public/assets/curtain.avif');
+                    const curtainTexture = new THREE.TextureLoader().load('public/assets/curtain.png');
                     const curtainMaterial = new THREE.MeshBasicMaterial({ map: curtainTexture, side: THREE.DoubleSide });
                     curtain = new THREE.Mesh(curtainGeometry, curtainMaterial);
                     curtain.rotation.y = -Math.PI;
@@ -648,9 +706,9 @@ Add 2 person to block 2nd level
             if (exitedLift && raycaster.intersectObjects([liftMesh]).length > 0) {
                 //    moveWithLift();
             } else if (raycaster.intersectObjects([auction_painting]).length > 0) {
-                paintingDetails.style.animation='swipe 0.5s';
+                paintingDetails.style.animation = 'swipe 0.5s';
                 paintingDetails.addEventListener('animationend', () => {
-                    paintingDetails.style.animation='';
+                    paintingDetails.style.animation = '';
                 });
                 if (auction_painting_id <= 0) {
                     paintingInfo.innerHTML = "No Auction Currently. Please wait for next auction";
@@ -679,9 +737,9 @@ Add 2 person to block 2nd level
 
                 }
             } else if (raycaster.intersectObjects(paintings).length > 0) {
-                paintingDetails.style.animation='swipe 3s';
+                paintingDetails.style.animation = 'swipe 3s';
                 paintingDetails.addEventListener('animationend', () => {
-                    paintingDetails.style.animation='';
+                    paintingDetails.style.animation = '';
                 });
                 auctionInfo.style.display = 'none'; // only visible if auction
                 const clickedPainting = raycaster.intersectObjects(paintings)[0].object;
@@ -827,7 +885,7 @@ Add 2 person to block 2nd level
             scene.add(character);
             return character;
         }
-        geoChoice = Math.floor(Math.random() * randomGeoChoices.length);
+        geoChoice = -1; //Math.floor(Math.random() * randomGeoChoices.length);
         colorChoice = Math.floor(Math.random() * randomColors.length);
 
 
@@ -1003,7 +1061,12 @@ Add 2 person to block 2nd level
         character_choices = ["1", "1", "4", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
         // 1 is lady, 4 is old man, 5 is suit girl, 6 is child
         //const glbLoader2 = new THREE.GLTFLoader();
-        const MAX_CHARACTERS = 15;
+        let MAX_CHARACTERS;
+        if (METHOD3) {
+            MAX_CHARACTERS = 0;
+        } else {
+            MAX_CHARACTERS = 15;
+        }
         for (i = 0; i < MAX_CHARACTERS; i++) {
             const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
             const inFile = 'assets/' + character_choices[choice] + '.glb'
@@ -1037,15 +1100,15 @@ Add 2 person to block 2nd level
                 }
             });
         }
-        character_choices = ["1", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
-        //glbLoader2 = new THREE.GLTFLoader();
-        for (i = 0; i < 7; i++) {
-            const choice = Math.floor(Math.random() * character_choices.length); //i % character_choices.length;//Math.floor(Math.random() * character_choices.length);
-            const inFile = 'assets/' + character_choices[choice] + '.glb'
-            //console.log('choice is ' + choice);
+
+
+        // used in METHOD3
+        function createCharacter2(other_player) {
+            const inFile = 'assets/' + other_player.geoChoice + '.glb'
             glbLoader.load(inFile, (gltf) => {
                 otherCharacter = gltf.scene;
-                otherCharacters.push(otherCharacter);
+                otherCharactersV2[other_player.addr] = otherCharacter;
+                console.log("creating character " + other_player.addr + " with " + other_player.geoChoice)
                 mixer = new THREE.AnimationMixer(otherCharacter);
                 otherMixers.push(mixer);
 
@@ -1063,22 +1126,7 @@ Add 2 person to block 2nd level
                 otherActions.push(otherAction);
                 otherCharacter.scale.set(0.3, 0.3, 0.3);
                 scene.add(otherCharacter);
-
-                if (otherCharacters.length == 7) {
-                    for (i = 0; i < fakePlayers; i++) {
-                        fakePlayerMeshs.push(otherCharacters[i]);
-                        otherCharacters[i].position.set(-4 + Math.random() * 4, 0.1, -1 + Math.random() * 4);
-                    }
-                }
             });
-        }
-
-        // to fix
-        function createCharacter2(geoChoice, colorChoice, pos, ry) {
-            model.position.set(pos.x, pos.y, pos.z);
-            model.rotation.y = ry;
-            console.log("Character 2.0" + model);
-            character = model;
         }
         //character = createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
         //createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
@@ -1246,7 +1294,7 @@ Add 2 person to block 2nd level
         let level1_y = 0.06  // 0.16 for createCharacter1
         function animate() {
             requestAnimationFrame(animate);
-            if (!loaded) {
+            if (!loaded || geoChoice < 0) {
                 return;
             }
             if (!character) return;
