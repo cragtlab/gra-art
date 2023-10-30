@@ -135,12 +135,14 @@ xxx(); function xxx() {
             //alert("yeah" + accounts[0]);
         }
         if (loaded) {
-            characterSelection.style.opacity = 100;
+            characterSelection.style.display=''; // none as overlay on explorer / wallet buttons
+            setTimeout(()=>{characterSelection.style.opacity = 100;},100);
             overlay.style.display='none';
             //container.style.opacity = 0;
         }
         if(typeof(geoChoice) != 'undefined' && geoChoice >= 0){
             container.style.opacity = 0;
+            setTimeout(()=>{characterSelection.style.display='none'},100);
             return;
         }
 
