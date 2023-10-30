@@ -136,13 +136,13 @@ xxx(); function xxx() {
         }
         if (loaded) {
             characterSelection.style.display=''; // none as overlay on explorer / wallet buttons
-            setTimeout(()=>{characterSelection.style.opacity = 100;},100);
+            setTimeout(()=>{characterSelection.style.opacity = 100;},1000);
             overlay.style.display='none';
             //container.style.opacity = 0;
         }
         if(typeof(geoChoice) != 'undefined' && geoChoice >= 0){
             container.style.opacity = 0;
-            setTimeout(()=>{characterSelection.style.display='none'},100);
+            setTimeout(()=>{characterSelection.style.display='none'},1000);
             return;
         }
 
@@ -176,7 +176,7 @@ xxx(); function xxx() {
   
     cards.forEach((card) => {
         card.addEventListener("touchstart", cardSelected);
-        card.addEventListener("mouseclick", cardSelected);
+        card.addEventListener("click", cardSelected);
         //card.addEventListener("mouseout", stopAnimateCard);
         //card.addEventListener("touchend", stopAnimateCard);
         //card.addEventListener("touchcancel", stopAnimateCard);
