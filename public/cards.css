@@ -15,12 +15,13 @@
     --mewtwofront: url(assets/static6.png);
   }
   .card {
-    width: 71.5vw;
+    /*width: 71.5vw;
     height: 100vw;
     @media screen and (min-width: 300px) {
+    */
       width: clamp(12.9vw, 61vh, 18vw);
       height: clamp(18vw, 85vh, 25.2vw);
-    }
+    /*}*/
     position: relative;
     overflow: hidden;
     margin: 20px;
