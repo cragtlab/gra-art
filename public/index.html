@@ -75,8 +75,9 @@ Add 2 person to block 2nd level
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             /* Subtle shadow for depth. */
         }
-        #characterSelection>center>button{
-            font-size:32px;
+
+        #characterSelection>center>button {
+            font-size: 32px;
         }
 
         #chatbox {
@@ -147,23 +148,40 @@ Add 2 person to block 2nd level
             pointer-events: none;
         }
 
+        #innerCircle {
+            /* not used as just comestic */
+            position: absolute;
+            left: calc(50% - 35px);
+            top: calc(50% - 35px);
+            width: 70px;
+            height: 70px;
+            background-color: #CCC;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
         #container {
             position: relative;
             transition: opacity 2s;
         }
 
         #container canvas,
-        #overlay, #characterSelection {
+        #overlay {
             background: beige;
             position: absolute;
             align-items: center;
             justify-content: center;
         }
-        #characterSelection{
+
+        #characterSelection {
             /*top: 200px; /* for qr code */
             z-index: 99;
             border-radius: 30px;
             transition: opacity 2s;
+            /*background: beige; /*other colors seem too odd*/
+            position: absolute;
+            align-items: center;
+            justify-content: center;
         }
 
         /* emoji scrolling */
@@ -240,16 +258,23 @@ Add 2 person to block 2nd level
         </div>
     </div>
     <div id="characterSelection" style="opacity:0;display:none">
-        <center><h1>Choose Your Avatar</h1>
-        <section class="cards">
-            <div choice="6" class="card charizard animated"></div>
-            <div choice="4" class="card pika animated"></div>
-            <div choice="1" class="card eevee animated"></div>
-            <div choice="5" class="card mewtwo animated"></div>
-          </section>
-         <button onclick="geoChoice=currentChoice;characterSelection.style.display='none'">Confirm Your Avatar</button></center>
+        <center>
+            <h1>Choose Your Avatar</h1>
+            <section class="cards">
+                <div choice="6" class="card charizard animated"></div>
+                <div choice="4" class="card pika animated"></div>
+                <div choice="1" class="card eevee animated"></div>
+                <div choice="5" class="card mewtwo animated"></div>
+            </section>
+            <button onclick="geoChoice=currentChoice;characterSelection.style.display='none'">Confirm Your
+                Avatar</button>
+        </center>
     </div>
-    <div id="circle-overlay"></div>
+    <div id="circle-overlay">
+
+    </div>
+
+
     <div id="connectDiv">
         <w3m-core-button></w3m-core-button>
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
@@ -831,7 +856,7 @@ Add 2 person to block 2nd level
 
         let showBuyVIPAlready = false;
         function moveWithLift() {
-            if (accounts && accounts.length > 0) {
+            if (typeof(vipContract) != 'undefined' && accounts && accounts.length > 0) {
                 vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result) {
                     console.log("result: " + result);
                     if (result > 0) { // own at least 1
@@ -1128,6 +1153,9 @@ Add 2 person to block 2nd level
                 otherAction.setLoop(THREE.LoopRepeat);
                 otherActions.push(otherAction);
                 otherCharacter.scale.set(0.3, 0.3, 0.3);
+
+                addMeText2(otherCharacter, getNiceName(other_player.addr), 0.3, -0.5, 2.1);
+
                 scene.add(otherCharacter);
             });
         }
@@ -1136,7 +1164,6 @@ Add 2 person to block 2nd level
         // addMeText(0.03, 0.2) // old character
         let textLabel;
         function addMeText(fontsize, x, y) {
-            // add "Me" text to character?
             const loader = new THREE.FontLoader();
             let font;
             loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
@@ -1144,7 +1171,7 @@ Add 2 person to block 2nd level
                     font = loadedFont;
 
                     // Create a 3D text label
-                    const textGeometry = new THREE.TextGeometry('Me', {
+                    const textGeometry = new THREE.TextGeometry("Me", {
                         font: font,
                         size: fontsize, // Text size
                         height: 0.005, // Extrusion depth
@@ -1155,6 +1182,29 @@ Add 2 person to block 2nd level
                     textLabel.rotation.y = Math.PI;
                     //textLabel.rotation.z=Math.PI/2;
                     character.add(textLabel);
+                });
+        }
+        
+        let textLabel2; // for debugging
+        function addMeText2(model, text, fontsize, x, y) {
+            // add "Me" text to character?
+            const loader = new THREE.FontLoader();
+            let font;
+            loader.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
+                (loadedFont) => {
+                    font = loadedFont;
+
+                    // Create a 3D text label
+                    const textGeometry = new THREE.TextGeometry(text, {
+                        font: font,
+                        size: fontsize, // Text size
+                        height: 0.005, // Extrusion depth
+                    });
+                    const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
+                    textLabel2 = new THREE.Mesh(textGeometry, textMaterial);
+                    textLabel2.position.set(x, y, 0); // Adjust position as needed
+                    //textLabel2.rotation.y = Math.PI;
+                    model.add(textLabel2);
                 });
         }
         // Initialize the camera for third-person view
@@ -1340,7 +1390,7 @@ Add 2 person to block 2nd level
                 const characterBox = new THREE.Box3().setFromObject(character);
                 const liftBox = new THREE.Box3().setFromObject(liftMesh);
                 if (characterBox.intersectsBox(liftBox)) {
-                    if (exitedLift) { moveWithLift(); }
+                    if (exitedLift) { moveWithLift(); console.log("moving here")}
                 } else {
                     exitedLift = true;
                 }
