@@ -131,9 +131,20 @@ Add 2 person to block 2nd level
 
         #connectBtn,
         #changeNameBtn,
-        #getVIPBtn {
+        #getVIPBtn,
+        #profileBtn {
             background: #1D8482;
             color: #E0F1FF;
+        }
+        #profileInfo{
+            display: none;
+            background: ghostwhite;
+            position: absolute;
+            right: 250px;
+            top: 50px;
+            padding: 10px;
+            border-radius: 25px;
+            z-index: 10001;
         }
 
         #circle-overlay {
@@ -280,6 +291,13 @@ Add 2 person to block 2nd level
         <button id="connectBtn" onclick="clickConnect()">Connect Wallet</button>
         <button id="changeNameBtn" style="display:none" onclick="changeName()">Change Name</button>
         <button id="getVIPBtn" style="display:none" onclick="getVIP()">Get VIP</button>
+        <button id="profileBtn" style="display:none" onclick="profileInfo.style.display=''">Get VIP</button>
+    </div>
+    <div id="profileInfo">
+        Selected Avatar: <img src="">
+        <br/>Name: <input><button>Change</button>
+        <br/>VIP
+        <br/><button onclick="profileInfo.style.display='none'">Close</button>
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
@@ -1085,6 +1103,26 @@ Add 2 person to block 2nd level
 
             scene.add(model_spaceman);
         });
+        let model_piano1, model_piano2;
+        glbLoader.load('assets/piano1.glb', (gltf) => {
+            model_piano1 = gltf.scene;
+
+            // Scale and position the model
+            model_piano1.scale.set(0.3,0.17,0.5)
+            model_piano1.position.set(-0.2, 0.21, 4.27)
+            model_piano1.rotation.y = 3.9
+            scene.add(model_piano1);
+        });
+        /*
+        glbLoader.load('assets/piano2.glb', (gltf) => {
+            model_piano2 = gltf.scene;
+
+            // Scale and position the model
+            model_piano2.scale.set(12, 12, 12);
+            model_piano2.position.set(-3.6, 0, 0.096)
+            model_piano2.rotation.y = 1.15
+            scene.add(model_piano2);
+        });*/
 
         character_choices = ["1", "1", "4", "4", "5", "6"] // "0" is facing wrongly, "2" too tall, "3" is too dark ["0", "1"]// "3"];
         // 1 is lady, 4 is old man, 5 is suit girl, 6 is child
