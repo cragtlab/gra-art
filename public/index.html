@@ -136,7 +136,8 @@ Add 2 person to block 2nd level
             background: #1D8482;
             color: #E0F1FF;
         }
-        #profileInfo{
+
+        #profileInfo {
             display: none;
             background: ghostwhite;
             position: absolute;
@@ -295,9 +296,9 @@ Add 2 person to block 2nd level
     </div>
     <div id="profileInfo">
         Selected Avatar: <img src="">
-        <br/>Name: <input><button>Change</button>
-        <br/>VIP
-        <br/><button onclick="profileInfo.style.display='none'">Close</button>
+        <br />Name: <input><button>Change</button>
+        <br />VIP
+        <br /><button onclick="profileInfo.style.display='none'">Close</button>
     </div>
     <canvas id='canvas'></canvas>
     <div id='positionInfo'></div>
@@ -363,6 +364,43 @@ Add 2 person to block 2nd level
             document.querySelector("#positionInfo").style.display = 'none';
         }
 
+        function teleportTo(otherAddr) {
+            for (player of playerPositions) {
+                if (player.addr === otherAddr) {
+                    console.log(player.position + "//" + player.ry)
+                    const newRotation = character.rotation.clone();
+                    newRotation.y=player.ry;
+                    teleportInFrontOfPosition(character,
+                        new THREE.Vector3(player.position.x, player.position.y, player.position.z),
+                        newRotation,
+                        1);
+                    break;
+                }
+            }
+        }
+        function teleportInFrontOfPosition(object, newPosition, newRotation, distance) {
+            // Calculate the new position in front of the mesh
+            let direction = new THREE.Vector3(0, 0, -1); // Adjust the direction as needed
+            direction.applyEuler(newRotation); // Apply the mesh's rotation to the direction
+            direction.normalize();
+            // Calculate the new rotation first
+            newRotation.set(0, Math.atan2(direction.x, direction.z), 0);
+
+            newPosition.add(direction.multiplyScalar(-distance));
+            // Calculate the new rotation to face the mesh
+
+            // Set the new position and rotation for the object
+            object.position.copy(newPosition);
+            object.rotation.copy(newRotation);
+        }
+        // for testing
+        // teleportInFrontOfMesh(character, otherCharacter, 1);
+        function teleportInFrontOfMesh(object, mesh, distance) {
+            // Clone the mesh's position and rotation
+            const newPosition = mesh.position.clone();
+            const newRotation = mesh.rotation.clone();
+            teleportInFrontOfPosition(object, newPosition, newRotation, distance);
+        }
         var playerPositions = [
             // { geoChoice: 0, colorChoice: 0, position: { x: -3, y: 0.1, z: -0.19 }, ry: -0.5 }
         ];
@@ -457,6 +495,8 @@ Add 2 person to block 2nd level
                         chatarea_direct.innerHTML = "<b>Me: </b>" + msg.msg + "<br/>" + chatarea_direct.innerHTML;
                     }
                 }
+                chatarea_direct.innerHTML = "<b>System: </b><a href='#' onclick='teleportTo(\"" + otherAddr + "\")'>Teleport to " + getNiceName(otherAddr) + "</a><br/>" + chatarea_direct.innerHTML;
+
                 chatarea.style.display = 'none';
                 chatarea_direct.style.display = '';
 
@@ -874,7 +914,7 @@ Add 2 person to block 2nd level
 
         let showBuyVIPAlready = false;
         function moveWithLift() {
-            if (typeof(vipContract) != 'undefined' && accounts && accounts.length > 0) {
+            if (typeof (vipContract) != 'undefined' && accounts && accounts.length > 0) {
                 vipContract.methods.balanceOf(accounts[0], 1).call().then(function (result) {
                     console.log("result: " + result);
                     if (result > 0) { // own at least 1
@@ -1079,7 +1119,7 @@ Add 2 person to block 2nd level
                 sound.setLoop(true);
                 sound.setRefDistance(50);
                 //sound.setVolume( 0.5 );
-
+ 
                 sound.play();
                 
                 model_dino.add(sound);
@@ -1108,7 +1148,7 @@ Add 2 person to block 2nd level
             model_piano1 = gltf.scene;
 
             // Scale and position the model
-            model_piano1.scale.set(0.3,0.17,0.5)
+            model_piano1.scale.set(0.3, 0.17, 0.5)
             model_piano1.position.set(-0.2, 0.21, 4.27)
             model_piano1.rotation.y = 3.9
             scene.add(model_piano1);
@@ -1116,7 +1156,7 @@ Add 2 person to block 2nd level
         /*
         glbLoader.load('assets/piano2.glb', (gltf) => {
             model_piano2 = gltf.scene;
-
+ 
             // Scale and position the model
             model_piano2.scale.set(12, 12, 12);
             model_piano2.position.set(-3.6, 0, 0.096)
@@ -1222,7 +1262,7 @@ Add 2 person to block 2nd level
                     character.add(textLabel);
                 });
         }
-        
+
         let textLabel2; // for debugging
         function addMeText2(model, text, fontsize, x, y) {
             // add "Me" text to character?
@@ -1428,7 +1468,7 @@ Add 2 person to block 2nd level
                 const characterBox = new THREE.Box3().setFromObject(character);
                 const liftBox = new THREE.Box3().setFromObject(liftMesh);
                 if (characterBox.intersectsBox(liftBox)) {
-                    if (exitedLift) { moveWithLift(); console.log("moving here")}
+                    if (exitedLift) { moveWithLift(); console.log("moving here") }
                 } else {
                     exitedLift = true;
                 }
