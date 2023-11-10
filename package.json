@@ -31,7 +31,7 @@
     "both": "concurrently \"npm run start\" \"npm run web\"",
     "start": "node src/server.js",
     "old_start2": "node src/server2.js",
-    "web": "npx vite --port 5500 --host --base /public/",
+    "web": "npx vite --port 80 --host --base /public/",
     "ganache": "npx ganache-cli --port 7545",
     "verify": "npx truffle run verify Painting --network matic --debug",
     "deploy ganache": "npx truffle migrate --reset",
