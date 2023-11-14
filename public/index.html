@@ -1,9 +1,9 @@
 <!--
-    mobile can chat and move?
-1st VIP to intro, 2nd screen non-Fan to buy Fan token
-3rd Buy fixed price, 
-4th start auction  -  CC, 
-Chatting with others    
+1st VIP (2nd level)
+2nd Mint a painting that is not owned (Explain minting / wallet)
+3rd CC List fixed price at 2 , Chat to request 1 (show chat/listing) 
+4th start auction  -  CC, SM until pay 
+5th OpenSea transactions (show transactions performed in chain)
 
 Add 2 person to block 2nd level
 -->
@@ -823,7 +823,7 @@ Add 2 person to block 2nd level
                     paintingInfo.innerHTML =
                         "<a id='paintingName' target=_blank>Painting #" + auction_painting_id + "</a>"
                         + "<br/>Message Artist: <a href='#' id='creator'></a> ";
-                    auctionInfo.style.display = ''; a
+                    auctionInfo.style.display = '';
                     loadAuctionDiv();
                     //+ "<br/><iframe width=500 height=300 src=/public/index2.html></iframe>";
 
@@ -1172,6 +1172,37 @@ Add 2 person to block 2nd level
             model_piano1.position.set(-0.2, 0.21, 4.27)
             model_piano1.rotation.y = 3.9
             scene.add(model_piano1);
+        });
+        // dinosaur
+        let model_dog1, model_dog2;
+        glbLoader.load('assets/dog1.glb', (gltf) => {
+            model_dog1 = gltf.scene;
+
+            // Scale and position the model
+            model_dog1.scale.set(0.3, 0.3, 0.3);
+            model_dog1.position.set(-3.61, 0, -0.19)
+            model_dog1.rotation.y = -4.29
+            // Load animations
+            m = new THREE.AnimationMixer(model_dog1);
+            otherMixers.push(m);
+            otherActions.push(m.clipAction(gltf.animations[4]));
+                       
+            scene.add(model_dog1);
+        });
+        glbLoader.load('assets/dog2.glb', (gltf) => {
+            model_dog2 = gltf.scene;
+
+            // Scale and position the model
+            model_dog2.scale.set(0.3, 0.3, 0.3);
+            model_dog2.position.set(-1.52, 2.5, -1.92)
+            model_dog2.rotation.y = 4.99
+
+            // Load animations
+            m = new THREE.AnimationMixer(model_dog2);
+            otherMixers.push(m);
+            otherActions.push(m.clipAction(gltf.animations[7]));
+                       
+            scene.add(model_dog2);
         });
         /*
         glbLoader.load('assets/piano2.glb', (gltf) => {
