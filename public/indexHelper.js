@@ -191,4 +191,4 @@ setInterval(function () {
     showWhoIsOnline();
     refreshData(); // so auction updated?
     // getNames() 
-}, 15000);
+}, 1000);

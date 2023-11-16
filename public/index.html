@@ -1,8 +1,12 @@
 <!--
-1st VIP (2nd level)
+Display Text (Main Lobby / VIP Lobby + Auction)
+Start from level 2
+How to Show NFT in MetaMask Wallet
+
+1st VIP (down basement)
 2nd Mint a painting that is not owned (Explain minting / wallet)
-3rd CC List fixed price at 2 , Chat to request 1 (show chat/listing) 
-4th start auction  -  CC, SM until pay 
+3rd CC List fixed price at 2 , Chat to nego price (show chat/listing)
+4th start auction  -  CC, SM until pay  (do in millions)
 5th OpenSea transactions (show transactions performed in chain)
 
 Add 2 person to block 2nd level
@@ -307,8 +311,8 @@ Add 2 person to block 2nd level
         <div id='auctionInfo'>
             <div id="bidFun"></div>
             <span id="live_auction" style='display:none'>
-                <label for="bidAmount">Enter Bid: $</label>
-                <input type="number" id="bidAmount" min="0" step="1">
+                <label for="bidAmount">Enter Bid: </label>
+                <input type="number" id="bidAmount" min="0" step="1">MATIC
                 <br /><button onclick="placeBid()">Place Bid</button>
                 <button onclick="placeBidHigher()">Place Higher Bid</button>
             </span>
@@ -948,7 +952,7 @@ Add 2 person to block 2nd level
                         m.addEventListener('animationend', () => {
                             showBuyVIPAlready = false;
                         });
-                        chatarea.innerHTML = "<b>System: </b> <a href='#' onclick='alert(\"trigger Mint NFT\")'>Buy a Fan Token</a> to enter the VIP area at level 2<br/>"
+                        chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter the VIP area to explore more art pieces at level 2<br/>"
                             + chatarea.innerHTML;
 
                     }
@@ -1181,7 +1185,7 @@ Add 2 person to block 2nd level
             // Scale and position the model
             model_dog1.scale.set(0.3, 0.3, 0.3);
             model_dog1.position.set(-3.61, 0, -0.19)
-            model_dog1.rotation.y = -4.29
+            model_dog1.rotation.y = 1.5
             // Load animations
             m = new THREE.AnimationMixer(model_dog1);
             otherMixers.push(m);
@@ -1195,7 +1199,7 @@ Add 2 person to block 2nd level
             // Scale and position the model
             model_dog2.scale.set(0.3, 0.3, 0.3);
             model_dog2.position.set(-1.52, 2.5, -1.92)
-            model_dog2.rotation.y = 4.99
+            model_dog2.rotation.y = 4.89
 
             // Load animations
             m = new THREE.AnimationMixer(model_dog2);
@@ -1283,7 +1287,7 @@ Add 2 person to block 2nd level
                 otherActions.push(otherAction);
                 otherCharacter.scale.set(0.3, 0.3, 0.3);
 
-                addMeText2(otherCharacter, getNiceName(other_player.addr), 0.3, -0.5, 2.1);
+                addMeText2(otherCharacter, getNiceName(other_player.addr), 0.3, -0.5, 1.7);
 
                 scene.add(otherCharacter);
             });

@@ -42,40 +42,41 @@ contract Painting is ERC721Royalty {
         _cost = cost;
         contract_owner = msg.sender; // security to restrict addPainting to only deployer
         address creator = address(0x3A3593B8e169236289Cf8699876A8Af393B02230);
+        address artist = address(0xeC79fC264b134eA21161D7e1487676b8D26B6AE8);
 
         _setDefaultRoyalty(creator, 1000); // 10%
 
-        addPainting("Life Is Good", creator, 0);
-        addPainting("Adventures Await", creator, 0);
-        addPainting("Journey On", creator, 0);
-        addPainting("Evening Autumn (KY)", creator, 0);
+        addPainting("Life Is Good", artist, 0);
+        addPainting("Adventures Await", artist, 0);
+        addPainting("Journey On", artist, 0);
+        addPainting("Evening Autumn (KY)", artist, 0);
         addPainting(
             "Fast Train",
             address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6),
             0
         );
 
-        addPainting("Maximum Throttle (MT)", creator, 0);
-        addPainting("MBS (KS)", creator, 0);
-        addPainting("Peekaboo", creator, 0);
-        addPainting("Golden Moments", creator, 0);
-        addPainting("Sunset", creator, 0);
+        addPainting("Maximum Throttle (MT)", artist, 0);
+        addPainting("MBS (KS)", artist, 0);
+        addPainting("Peekaboo", artist, 0);
+        addPainting("Golden Moments", artist, 0);
+        addPainting("Sunset", artist, 0);
 
-        addPainting("Blossoms", creator, 0);
+        addPainting("Blossoms", artist, 0);
         addPainting(
             "Darkness",
             address(0x3A3593B8e169236289Cf8699876A8Af393B02230),
             0
         );
-        addPainting("Bright", creator, 0);
-        addPainting("Rainbow Tree", creator, 0);
-        addPainting("Relax", creator, 0);
+        addPainting("Bright", artist, 0);
+        addPainting("Rainbow Tree", artist, 0);
+        addPainting("Relax", artist, 0);
 
-        addName(address(0x3A3593B8e169236289Cf8699876A8Af393B02230), "Van GRA");
+        addName(address(0x3A3593B8e169236289Cf8699876A8Af393B02230), "ThienRong");
         addName(address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), "lenovo");
-        addName(address(0x21586e20921f2d6C068830C9460c728c9a3411a2), "sm");
-        addName(address(0xCAAE7Ee609621f5B64d7553fdee4696B2a4Eb56F), "CC");
-        addName(address(0xeC79fC264b134eA21161D7e1487676b8D26B6AE8), "Homely");
+        addName(address(0x21586e20921f2d6C068830C9460c728c9a3411a2), "SiewMooi");
+        addName(address(0xCAAE7Ee609621f5B64d7553fdee4696B2a4Eb56F), "ChuiChi");
+        addName(address(0xeC79fC264b134eA21161D7e1487676b8D26B6AE8), "Van GRA");
         /*
         paintings[0].owner=address(0xB793eca1c417B001fa2b82cc35f8488124C54F0e);
         paintings[0].list_price=-1; 
@@ -123,8 +124,8 @@ contract Painting is ERC721Royalty {
         if (bids.length > 0) {
             require(amount > bids[bids.length - 1].amount);
         }
-        if (auction_expiry_date - block.timestamp < 3 minutes) {
-            auction_expiry_date = block.timestamp + 3 minutes;
+        if (auction_expiry_date - block.timestamp < 2 minutes) {
+            auction_expiry_date = block.timestamp + 2 minutes;
         }
 
         bids.push(Bid(amount, payable(msg.sender)));
