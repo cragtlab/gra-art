@@ -113,7 +113,7 @@ async function refreshData() {
             }
 
         });
-        loadAuctionPainting(await getAuctionPaintingID());
+            
     }
 }
 

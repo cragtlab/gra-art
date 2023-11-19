@@ -698,9 +698,9 @@ Add 2 person to block 2nd level
         glassTexture.offset.set(0, 0);
         glassTexture.repeat.set(12, 0.9); // ,1 will have a line 
         const glassMaterial = new THREE.MeshBasicMaterial({ map: glassTexture, side: THREE.DoubleSide, transparent: true, });
-        const glassGeometry = new THREE.BoxGeometry(wallSize * 7, level_2_start / 13, 0.1);
+        const glassGeometry = new THREE.BoxGeometry(wallSize * 5    , level_2_start / 13, 0.1);
         const glassPanel = new THREE.Mesh(glassGeometry, glassMaterial);
-        glassPanel.position.set(-3, 2.6, 3.47)
+        glassPanel.position.set(-2, 2.6, 3.47)
         scene.add(glassPanel);
         // create VIP for basement
         const vipTexture = new THREE.TextureLoader().load('/public/vip.png');
@@ -708,9 +708,9 @@ Add 2 person to block 2nd level
         vipTexture.offset.set(0, 0);
         vipTexture.repeat.set(10, 0.9); // ,1 will have a line 
         const vipMaterial = new THREE.MeshBasicMaterial({ map: vipTexture, side: THREE.DoubleSide, transparent: true, });
-        const vipGeometry = new THREE.BoxGeometry(wallSize * 7, level_2_start / 6.25, 0.01);
+        const vipGeometry = new THREE.BoxGeometry(wallSize * 5, level_2_start / 6.25, 0.01);
         const vipPanel = new THREE.Mesh(vipGeometry, vipMaterial);
-        vipPanel.position.set(-3, 0.2, 3.47)
+        vipPanel.position.set(-2, 0.2, 3.47)
         scene.add(vipPanel);
         // create VIP for lift
         const vipTexture2 = new THREE.TextureLoader().load('/public/vip.png');

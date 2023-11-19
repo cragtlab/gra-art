@@ -216,6 +216,11 @@ contract Painting is ERC721Royalty {
             delete bids;
             auction_painting_id = _id;
             auction_expiry_date = block.timestamp + 5 minutes;
+        }else{
+            // remove from auction
+            if(_id == auction_painting_id){
+                auction_painting_id = 0;
+            }
         }
     }
 
