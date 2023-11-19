@@ -84,8 +84,18 @@ function getVIP() {
 async function refreshData() {
     web3Paintings = await contract.methods.getPaintings().call()
     web3Names = await getNames(); // store array into names[wallet_address] map
-    console.log(web3Paintings);
-    console.log(web3Names);
+    //console.log(web3Paintings);
+    // show listed if listed
+    for(i=0;i<web3Paintings.length;i++){
+        if(web3Paintings[i].list_price === "0"){
+            paintingLabels[i].visible=false; 
+            paintingLabels[i].scale.set(0,0,0); // somehow visible fail
+        }else{
+            paintingLabels[i].visible=true; 
+            paintingLabels[i].scale.set(1,1,1); // somehow visible fail
+        }
+    }
+    //console.log(web3Names);
 
     // for index.html only, not index2.html
     if (typeof (loadAuctionPainting) != 'undefined') {
