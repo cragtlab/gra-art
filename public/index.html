@@ -1,11 +1,9 @@
 <!--
-1st VIP (2nd level)
-2nd Mint a painting that is not owned (Explain minting / wallet)
+1st Main Lobby - buying of painting and listed painting
+2nd VIP Lobby - NFT gated token
 3rd CC List fixed price at 2 , Chat to request 1 (show chat/listing) 
 4th start auction  -  CC, SM until pay 
-5th OpenSea transactions (show transactions performed in chain)
-
-Add 2 person to block 2nd level
+5th Metamask wallet import nft (can  transactions performed in chain)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -696,7 +694,7 @@ Add 2 person to block 2nd level
         const glassTexture = new THREE.TextureLoader().load('/public/glass-removebg-preview.png');
         glassTexture.wrapS = glassTexture.wrapT = THREE.RepeatWrapping;
         glassTexture.offset.set(0, 0);
-        glassTexture.repeat.set(12, 0.9); // ,1 will have a line 
+        glassTexture.repeat.set(9, 0.9); // ,1 will have a line 
         const glassMaterial = new THREE.MeshBasicMaterial({ map: glassTexture, side: THREE.DoubleSide, transparent: true, });
         const glassGeometry = new THREE.BoxGeometry(wallSize * 5    , level_2_start / 13, 0.1);
         const glassPanel = new THREE.Mesh(glassGeometry, glassMaterial);
@@ -706,7 +704,7 @@ Add 2 person to block 2nd level
         const vipTexture = new THREE.TextureLoader().load('/public/vip.png');
         vipTexture.wrapS = vipTexture.wrapT = THREE.RepeatWrapping;
         vipTexture.offset.set(0, 0);
-        vipTexture.repeat.set(10, 0.9); // ,1 will have a line 
+        vipTexture.repeat.set(4, 0.9); // ,1 will have a line 
         const vipMaterial = new THREE.MeshBasicMaterial({ map: vipTexture, side: THREE.DoubleSide, transparent: true, });
         const vipGeometry = new THREE.BoxGeometry(wallSize * 5, level_2_start / 6.25, 0.01);
         const vipPanel = new THREE.Mesh(vipGeometry, vipMaterial);
