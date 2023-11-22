@@ -113,9 +113,8 @@ async function refreshData() {
                 getVIPBtn.innerHTML = 'Get VIP';
                 getVIPBtn.disabled = '';
             }
-
         });
-            
+        loadAuctionPainting(await getAuctionPaintingID())
     }
 }
 
