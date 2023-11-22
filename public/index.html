@@ -1,15 +1,9 @@
 <!--
-Display Text (Main Lobby / VIP Lobby + Auction)
-Start from level 2
-How to Show NFT in MetaMask Wallet
-
-1st VIP (down basement)
-2nd Mint a painting that is not owned (Explain minting / wallet)
-3rd CC List fixed price at 2 , Chat to nego price (show chat/listing)
-4th start auction  -  CC, SM until pay  (do in millions)
-5th OpenSea transactions (show transactions performed in chain)
-
-Add 2 person to block 2nd level
+1st VIP (2nd level)
+2nd Mint a painting that is not owned 
+3rd CC List fixed price at 2 , Chat to request 1 (show chat/listing) 
+4th start auction  -  CC, SM until pay 
+5th Metamask/OpenSea transactions (show transactions performed in chain)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -324,7 +318,7 @@ Add 2 person to block 2nd level
     </div>
 
     <div id='chatarea' class='chatarea'><b>System:
-        </b>Welcome to the GRA Art Gallery. Visit the 
+        </b>Welcome to the GRA Art Gallery. Visit the
         <a href='#' onclick='teleport("earth")'>Earth Viewer</a>
         <a href='#' onclick='teleport("dino")'>Jurassic Zone</a>
         <a href='#' onclick='teleport("auction")'>Auction Zone</a>
@@ -372,23 +366,23 @@ Add 2 person to block 2nd level
         }
 
         var POIs = {
-            "earth" : "-6.37, 0.0, 1.48, 4.89",
-            "dino" : "7, 0.0, 3.25, 10",
-            "auction":"-2, 0.0, 0.61,0"
+            "earth": "-6.37, 0.0, 1.48, 4.89",
+            "dino": "7, 0.0, 3.25, 10",
+            "auction": "-2, 0.0, 0.61,0"
         }
-        function teleport(POI){
-            teleporting=true; // for animate
-            canvas.style.opacity=0.3;
+        function teleport(POI) {
+            teleporting = true; // for animate
+            canvas.style.opacity = 0.3;
             var point = POIs[POI];
-            if(point){
-                var data =point.split(",");
-                character.position.set(1*data[0],1*data[1],1*data[2]) // y is string causing problem 0.0
-                character.rotation.y=1*data[3];
+            if (point) {
+                var data = point.split(",");
+                character.position.set(1 * data[0], 1 * data[1], 1 * data[2]) // y is string causing problem 0.0
+                character.rotation.y = 1 * data[3];
             }
         }
         function teleportTo(otherAddr) {
-            teleporting=true; // for animate
-            canvas.style.opacity=0.3;
+            teleporting = true; // for animate
+            canvas.style.opacity = 0.3;
             for (player of playerPositions) {
                 if (player.addr === otherAddr) {
                     console.log(player.position + "//" + player.ry)
@@ -658,7 +652,7 @@ Add 2 person to block 2nd level
             [1, 3, 3, 3, 3, 3, 1],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
             [0, 0, 0, 0, 0, 0, 0],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -669,8 +663,8 @@ Add 2 person to block 2nd level
             [1, 1, 1, 1, 1, 1, 1],
             [1, 3, 3, 3, 3, 3, 1],
             [1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1],
-            [1, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
             [0, 0, 0, 0, 0, 0, 0],
             [1, 0, 0, 0, 0, 0, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -691,10 +685,43 @@ Add 2 person to block 2nd level
         //let wallTexture2 = new THREE.TextureLoader().load("OfficeCeiling005_4K_Roughness.jpg");
         //const wallMaterial2 = new THREE.MeshBasicMaterial({ map: wallTexture2, side: THREE.DoubleSide });
 
+
         let auction_painting, frame_mesh, curtain;
         let auction_painting_id = -1;
         paintings = [];
-        const wallSize = 1; // Adjust the size of maze walls as needed
+        const wallSize = 1; // Adjust the size of maze walls as needed        
+        // create ledge for 1st floor
+        const glassTexture = new THREE.TextureLoader().load('/public/glass-removebg-preview.png');
+        glassTexture.wrapS = glassTexture.wrapT = THREE.RepeatWrapping;
+        glassTexture.offset.set(0, 0);
+        glassTexture.repeat.set(9, 0.9); // ,1 will have a line 
+        const glassMaterial = new THREE.MeshBasicMaterial({ map: glassTexture, side: THREE.DoubleSide, transparent: true, });
+        const glassGeometry = new THREE.BoxGeometry(wallSize * 5    , level_2_start / 13, 0.1);
+        const glassPanel = new THREE.Mesh(glassGeometry, glassMaterial);
+        glassPanel.position.set(-2, 2.6, 3.47)
+        scene.add(glassPanel);
+        // create VIP for basement
+        const vipTexture = new THREE.TextureLoader().load('/public/vip.png');
+        vipTexture.wrapS = vipTexture.wrapT = THREE.RepeatWrapping;
+        vipTexture.offset.set(0, 0);
+        vipTexture.repeat.set(4, 0.9); // ,1 will have a line 
+        const vipMaterial = new THREE.MeshBasicMaterial({ map: vipTexture, side: THREE.DoubleSide, transparent: true, });
+        const vipGeometry = new THREE.BoxGeometry(wallSize * 5, level_2_start / 6.25, 0.01);
+        const vipPanel = new THREE.Mesh(vipGeometry, vipMaterial);
+        vipPanel.position.set(-2, 0.2, 3.47)
+        scene.add(vipPanel);
+        // create VIP for lift
+        const vipTexture2 = new THREE.TextureLoader().load('/public/vip.png');
+        vipTexture2.wrapS = vipTexture2.wrapT = THREE.RepeatWrapping;
+        vipTexture2.offset.set(0, 0);
+        vipTexture2.repeat.set(3, 0.9); // ,1 will have a line 
+        const vipMaterial2 = new THREE.MeshBasicMaterial({ map: vipTexture2, side: THREE.DoubleSide, transparent: true, });
+        const vipLiftGeometry = new THREE.BoxGeometry(wallSize * 2, level_2_start / 6.25, 0.01);
+        const vipLiftPanel = new THREE.Mesh(vipLiftGeometry, vipMaterial2);
+        vipLiftPanel.position.set(-3.9, 2.6, 0.6);
+        vipLiftPanel.rotation.y=-10.9
+        scene.add(vipLiftPanel);
+
         //const paintingMaterial = new THREE.MeshBasicMaterial({ color: 0x004040, side: THREE.DoubleSide });
         for (let row = 0; row < mazeMatrix.length; row++) {
             for (let col = 0; col < mazeMatrix[row].length; col++) {
@@ -795,7 +822,7 @@ Add 2 person to block 2nd level
         const liftMaterial = new THREE.MeshBasicMaterial({ color: 0x0099ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
         const liftMesh = new THREE.Mesh(liftGeometry, liftMaterial);
         // Position the button in the scene
-        liftMesh.position.set(-3.96, 0.05, 0.9);
+        liftMesh.position.set(-4.5, 2.45, 0.9);
         // Add the button to the scene
         scene.add(liftMesh);
 
@@ -948,11 +975,11 @@ Add 2 person to block 2nd level
                         showBuyVIPAlready = true;
                         //character.position.set(-2.9, 0, 0.94);
                         //character.rotation.y = -1.7;
-                        m = startMarquee("System: Buy a Fan Token to enter VIP area at level 2");
+                        m = startMarquee("System: Buy a Fan Token to enter VIP Lobby Basement");
                         m.addEventListener('animationend', () => {
                             showBuyVIPAlready = false;
                         });
-                        chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter the VIP area to explore more art pieces at level 2<br/>"
+                        chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter the VIP area to explore more art pieces at basement<br/>"
                             + chatarea.innerHTML;
 
                     }
@@ -962,11 +989,11 @@ Add 2 person to block 2nd level
                 // unregistered user cannot go up too
                 //character.position.set(-2.9, 0, 0.94);
                 //character.rotation.y = -1.7;
-                m = startMarquee("System: Buy a Fan Token to enter level 2.");
+                m = startMarquee("System: Buy a Fan Token to enter VIP Lobby.");
                 m.addEventListener('animationend', () => {
                     showBuyVIPAlready = false;
                 });
-                chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter level 2. Login with your wallet and get one now<br/>"
+                chatarea.innerHTML = "<b>System: </b> Buy a Fan Token to enter VIP Lobby. Login with your wallet and get one now<br/>"
                     + chatarea.innerHTML;
 
             }
@@ -1011,8 +1038,7 @@ Add 2 person to block 2nd level
 
             // Scale and position the model
             model.scale.set(0.18, 0.18, 0.18);
-            model.position.set(-2, 0, 0.61);
-
+            model.position.set(-2, 2.5, 0.61); // start from main lobby
             // Load animations
             mixer = new THREE.AnimationMixer(model);
             gltf.animations.forEach((clip) => {
@@ -1111,7 +1137,7 @@ Add 2 person to block 2nd level
 
             // Scale and position the model
             model_bouncer.scale.set(0.4, 0.4, 0.4);
-            model_bouncer.position.set(-3.6, 0, 0.096)
+            model_bouncer.position.set(-4.5, 2.5, 0.096)
             model_bouncer.rotation.y = 1.15
 
             // Load animations
@@ -1184,13 +1210,13 @@ Add 2 person to block 2nd level
 
             // Scale and position the model
             model_dog1.scale.set(0.3, 0.3, 0.3);
-            model_dog1.position.set(-3.61, 0, -0.19)
-            model_dog1.rotation.y = 1.5
+            model_dog1.position.set(-2.1, 0, -2.59)
+            model_dog1.rotation.y = -31.7
             // Load animations
             m = new THREE.AnimationMixer(model_dog1);
             otherMixers.push(m);
             otherActions.push(m.clipAction(gltf.animations[4]));
-                       
+
             scene.add(model_dog1);
         });
         glbLoader.load('assets/dog2.glb', (gltf) => {
@@ -1205,7 +1231,7 @@ Add 2 person to block 2nd level
             m = new THREE.AnimationMixer(model_dog2);
             otherMixers.push(m);
             otherActions.push(m.clipAction(gltf.animations[7]));
-                       
+
             scene.add(model_dog2);
         });
         /*
@@ -1296,6 +1322,7 @@ Add 2 person to block 2nd level
         //createCharacter2(geoChoice, colorChoice, { x: -2, y: 0.1, z: 0.61 });
         // addMeText(0.03, 0.2) // old character
         let textLabel;
+        let paintingLabels = [];
         function addMeText(fontsize, x, y) {
             const loader = new THREE.FontLoader();
             let font;
@@ -1315,7 +1342,25 @@ Add 2 person to block 2nd level
                     textLabel.rotation.y = Math.PI;
                     //textLabel.rotation.z=Math.PI/2;
                     character.add(textLabel);
+
+                    // add painting status too
+                    console.log("I am in painting")
+                    for (painting of paintings) {
+                        const paintGeometry = new THREE.TextGeometry("Listed", {
+                            font: font,
+                            size: 0.15, // Text size
+                            height: 0.005, // Extrusion depth
+                        });
+                        pLabel = new THREE.Mesh(paintGeometry, textMaterial);
+                        pLabel.position.set(-0.25, 0.4, 0) // Adjust position as needed
+                        painting.add(pLabel);
+                        paintingLabels.push(pLabel);
+                    }
+
+
                 });
+
+
         }
 
         let textLabel2; // for debugging
@@ -1340,6 +1385,39 @@ Add 2 person to block 2nd level
                     model.add(textLabel2);
                 });
         }
+        // Main Lobby Text
+        const loader = new THREE.FontLoader();
+        let font;
+        loader.load('/public/assets/Monofett_Regular.json',
+            (loadedFont) => {
+                font = loadedFont;
+
+                // Create a 3D text label
+                const textGeometry = new THREE.TextGeometry("Main Lobby", {
+                    font: font,
+                    size: 0.625, // Text size
+                    height: 0.005, // Extrusion depth
+                });
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0xDAA520 }); // Text color
+                wallText = new THREE.Mesh(textGeometry, textMaterial);
+                wallText.position.set(0.3, 4.17, 5)// Adjust position as needed
+                wallText.rotation.y = Math.PI
+                scene.add(wallText);
+
+                wallText3 = new THREE.Mesh(textGeometry, textMaterial);
+                wallText3.position.set(-4.3, 4.17, -2.74)// Adjust position as needed
+                scene.add(wallText3);
+
+                const textGeometry2 = new THREE.TextGeometry("VIP Lobby", {
+                    font: font,
+                    size: 0.625, // Text size
+                    height: 0.005, // Extrusion depth
+                });
+                wallText2 = new THREE.Mesh(textGeometry2, textMaterial);
+                wallText2.position.set(-4.3, 1.67, -2.74)// Adjust position as needed
+                scene.add(wallText2);
+            });
+
         // Initialize the camera for third-person view
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         // trex
@@ -1406,7 +1484,7 @@ Add 2 person to block 2nd level
             //console.log(event.target);
             //  event.preventDefault();
             if (event.target && (event.target.tagName.toLowerCase() == "button"
-                || event.target.tagName.toLowerCase() == "input" 
+                || event.target.tagName.toLowerCase() == "input"
                 || event.target.tagName.toLowerCase() == "a")) {
                 // don't move when click on button
                 return;
@@ -1488,15 +1566,15 @@ Add 2 person to block 2nd level
             if (!character) return;
 
             if (teleporting) {
-                canvas.style.opacity-=0.01;
-                if(canvas.style.opacity <= 0){
+                canvas.style.opacity -= 0.01;
+                if (canvas.style.opacity <= 0) {
                     teleporting = false;
-                    canvas.style.opacity =1;
+                    canvas.style.opacity = 1;
                 }
             } else if (moveY) { // moving up/down lift
-                character.position.z = 0.6; character.position.x = -3.96;
-                console.log(moveDown + " " + (1*character.position.y));
-                
+                character.position.z = 0.6; character.position.x = -4.5;
+                console.log(moveDown + " " + (1 * character.position.y));
+
                 if (character.position.y >= level2_y || moveDown) {
                     moveDown = true;
                     camY -= 2 * movementSpeed;
@@ -1534,13 +1612,13 @@ Add 2 person to block 2nd level
                 // auto up/down                
                 const characterBox = new THREE.Box3().setFromObject(character);
                 const liftBox = new THREE.Box3().setFromObject(liftMesh);
-                
+
                 if (!isNaN(characterBox.min.x) && !isNaN(liftBox.min.x) && characterBox.intersectsBox(liftBox)) {
-                    if (exitedLift) { 
+                    if (exitedLift) {
                         console.log(characterBox);
                         console.log(liftBox);
-                        moveWithLift(); 
-                        console.log("moving here") 
+                        moveWithLift();
+                        console.log("moving here")
                     }
                 } else {
                     exitedLift = true;

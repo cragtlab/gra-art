@@ -86,8 +86,8 @@ contract Painting is ERC721Royalty {
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://QmXyoc8kwjUvPqgJP3kQeLiSGS4wFnHt78JPs9AsYepGHd/";
-        //"https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
+        //return "ipfs://QmXyoc8kwjUvPqgJP3kQeLiSGS4wFnHt78JPs9AsYepGHd/"; // works too but metamask somehow dont show the image when import even though confirm can fetch in background.html
+        return "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
     }
 
     /* name related */
@@ -217,6 +217,11 @@ contract Painting is ERC721Royalty {
             delete bids;
             auction_painting_id = _id;
             auction_expiry_date = block.timestamp + 5 minutes;
+        }else{
+            // remove from auction
+            if(_id == auction_painting_id){
+                auction_painting_id = 0;
+            }
         }
     }
 
