@@ -8,7 +8,6 @@ contract VIPNFT is ERC1155 {
     uint256 public minted = 0;
     string public name = "Fan Token for GRA Art Gallery"; // for OpenSea to show instead of unidentified contract
 
-
     constructor()
         ERC1155(
             "ipfs://QmSPAsBPprhrdvLm1yq8G5upY2EpSZTrcpPdL6ic6dfinE/{id}"

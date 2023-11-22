@@ -1,2 +1,3 @@
-{"image":"ipfs://QmYNx3KBatcoeec8Z1EkeLV4N5eGp769i5PAMs1hhceixM/4.png",
+{"image":"https://cragtlab.github.io/gra-art/public/assets/art/4.png",
+"imageIPFS": "ipfs://QmYNx3KBatcoeec8Z1EkeLV4N5eGp769i5PAMs1hhceixM/4.png",
 "attributes":[{"trait_type":"Earring","value":"Silver Hoop"},{"trait_type":"Background","value":"Orange"},{"trait_type":"Fur","value":"Robot"},{"trait_type":"Clothes","value":"Striped Tee"},{"trait_type":"Mouth","value":"Discomfort"},{"trait_type":"Eyes","value":"X Eyes"}]}

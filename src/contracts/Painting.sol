@@ -17,7 +17,6 @@ contract Painting is ERC721Royalty {
         int256 list_price; // -1 means auction, 0 means not listed by owner
     }
     Paint[] public paintings;
-
     struct Bid {
         uint256 amount;
         address payable bidder;
@@ -72,9 +71,15 @@ contract Painting is ERC721Royalty {
         addPainting("Rainbow Tree", artist, 0);
         addPainting("Relax", artist, 0);
 
-        addName(address(0x3A3593B8e169236289Cf8699876A8Af393B02230), "ThienRong");
+        addName(
+            address(0x3A3593B8e169236289Cf8699876A8Af393B02230),
+            "ThienRong"
+        );
         addName(address(0x73382d70c64b527a7652Eb21C48bfc1eD2B6E0b6), "lenovo");
-        addName(address(0x21586e20921f2d6C068830C9460c728c9a3411a2), "SiewMooi");
+        addName(
+            address(0x21586e20921f2d6C068830C9460c728c9a3411a2),
+            "SiewMooi"
+        );
         addName(address(0xCAAE7Ee609621f5B64d7553fdee4696B2a4Eb56F), "ChuiChi");
         addName(address(0xeC79fC264b134eA21161D7e1487676b8D26B6AE8), "Van GRA");
         /*
@@ -85,9 +90,16 @@ contract Painting is ERC721Royalty {
         */
     }
 
-    function _baseURI() internal pure override returns (string memory) {
-        //return "ipfs://QmXyoc8kwjUvPqgJP3kQeLiSGS4wFnHt78JPs9AsYepGHd/"; // works too but metamask somehow dont show the image when import even though confirm can fetch in background.html
-        return "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/";
+    string baseURIStr = "https://cragtlab.github.io/gra-art/src/metadata/";
+
+    //"ipfs://QmXyoc8kwjUvPqgJP3kQeLiSGS4wFnHt78JPs9AsYepGHd/"; // works too but metamask somehow dont show the image when import even though confirm can fetch in background.html
+    // "https://raw.githubusercontent.com/cragtlab/gra-art/main/src/metadata/"; dont work in silvergate
+    function updateBaseURI(string memory newBaseURIStr) public {
+        baseURIStr = newBaseURIStr;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURIStr;
     }
 
     /* name related */
@@ -217,9 +229,9 @@ contract Painting is ERC721Royalty {
             delete bids;
             auction_painting_id = _id;
             auction_expiry_date = block.timestamp + 5 minutes;
-        }else{
+        } else {
             // remove from auction
-            if(_id == auction_painting_id){
+            if (_id == auction_painting_id) {
                 auction_painting_id = 0;
             }
         }

@@ -87,7 +87,9 @@ async function refreshData() {
     //console.log(web3Paintings);
     // show listed if listed
     for(i=0;i<web3Paintings.length;i++){
-        if(web3Paintings[i].list_price === "0"){
+        // 0 price AND not minted yet
+        if( (web3Paintings[i].list_price === "0" || web3Paintings[i].list_price === 0)
+            && web3Paintings[i].owner !="0x0000000000000000000000000000000000000000"){
             paintingLabels[i].visible=false; 
             paintingLabels[i].scale.set(0,0,0); // somehow visible fail
         }else{

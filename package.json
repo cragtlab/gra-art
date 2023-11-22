@@ -29,6 +29,8 @@
   },
   "scripts": {
     "both": "concurrently \"npm run start\" \"npm run web\"",
+    "deploy mumbai compile none (if default fail)": "npx truffle migrate --reset --network matic --compile-none",
+    "deploy mumbai": "npx truffle migrate --reset --network matic",
     "start": "node src/server.js",
     "old_start2": "node src/server2.js",
     "web": "npx vite --port 5500 --host --base /public/",
@@ -37,8 +39,6 @@
     "deploy ganache": "npx truffle migrate --reset",
     "compile truffle": "npx truffle compile",
     "deploy sepolia": "npx truffle migrate --reset --network sepolia --compile-none",
-    "deploy mumbai compile none (if default fail)": "npx truffle migrate --reset --network matic --compile-none",
-    "deploy mumbai": "npx truffle migrate --reset --network matic",
     "oldstart": "set \"GENERATE_SOURCEMAP=false\" && react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",

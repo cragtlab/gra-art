@@ -6,7 +6,6 @@ module.exports = async function (deployer) {
     const COST = web3.utils.toWei('1', 'ether')
 
     await deployer.deploy(VIPNFT)
-
     await deployer.deploy(Painting, NAME, SYMBOL, COST) // must await cause get too many requests from rpc?
    
 }
