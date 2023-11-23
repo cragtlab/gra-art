@@ -1313,7 +1313,7 @@
                 otherActions.push(otherAction);
                 otherCharacter.scale.set(0.3, 0.3, 0.3);
 
-                addMeText2(otherCharacter, getNiceName(other_player.addr), 0.3, -0.5, 1.7);
+                addMeText2(otherCharacter, getNiceName(other_player.addr), 0.3, -0.5, 1.8);
 
                 scene.add(otherCharacter);
             });
@@ -1380,7 +1380,11 @@
                     });
                     const textMaterial = new THREE.MeshBasicMaterial({ color: 0x404040 }); // Text color
                     textLabel2 = new THREE.Mesh(textGeometry, textMaterial);
-                    textLabel2.position.set(x, y, 0); // Adjust position as needed
+                    
+                    textLabel2.position.set(x, y, 0.2); // Adjust position as needed
+                    textLabel2.geometry.computeBoundingBox(); // adjust x to middle
+                    textLabel2.position.x=-textLabel2.geometry.boundingBox.getSize().x/2;
+                    //textLabel2.position.y=new THREE.Box3().setFromObject(model).getSize().y+1.5;
                     //textLabel2.rotation.y = Math.PI;
                     model.add(textLabel2);
                 });
