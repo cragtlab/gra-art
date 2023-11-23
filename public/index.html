@@ -1384,7 +1384,7 @@
                     textLabel2.position.set(x, y, 0.2); // Adjust position as needed
                     textLabel2.geometry.computeBoundingBox(); // adjust x to middle
                     textLabel2.position.x=-textLabel2.geometry.boundingBox.getSize().x/2;
-                    //textLabel2.position.y=new THREE.Box3().setFromObject(model).getSize().y+1.5;
+                    //textLabel2.position.y=new THREE.Box3().setFromObject(model).getSize().y*4;
                     //textLabel2.rotation.y = Math.PI;
                     model.add(textLabel2);
                 });

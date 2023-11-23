@@ -31,8 +31,10 @@ async function clickConnect() {
         paintingAddress = contractJSON.networks[networkId].address;
         contractX = await new web3x.eth.Contract(contractJSON.abi, paintingAddress);
 
-        web3Paintings = await contractX.methods.getPaintings().call();
+        // try take name first as showing walletAddress
         web3Names = await contractX.methods.getNames().call(); // getNames
+        web3Paintings = await contractX.methods.getPaintings().call();
+        
 
         try {
             auction_painting_id = await contractX.methods.getAuctionPaintingID().call();
