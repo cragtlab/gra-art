@@ -2,6 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Spelling Game</title>
     <style>
       body { margin: 0; }
@@ -11,11 +13,11 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 24px;
+        font-size: 40px;
       }
       .button-container {
         position: absolute;
-        bottom: 20px;
+        top: 100px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
@@ -23,7 +25,7 @@
       }
       .animal-button {
         padding: 10px 20px;
-        font-size: 18px;
+        font-size: 40px;
         cursor: pointer;
         border: none;
         background-color: #0074d9;
@@ -32,14 +34,15 @@
       }
       #score {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 20px;
+        top: 30px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
         color: white;
       }
       #result {
         position: absolute;
-        bottom: 60px;
+        top: 60px;
         left: 50%;
         transform: translateX(-50%);
         font-size: 24px;
@@ -54,12 +57,13 @@
     </style>
   </head>
   <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="three.min.js"></script>
     <div id="word-container"></div>
     <div class="button-container">
       <button class="animal-button" id="correct-button"></button>
       <button class="animal-button" id="incorrect-button1"></button>
       <button class="animal-button" id="incorrect-button2"></button>
+	<button class="animal-button" id="incorrect-button3"></button>
     </div>
     <div id="score">Score: 0</div>
     <div id="result"></div>
@@ -70,24 +74,71 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      const geometry = new THREE.BoxGeometry();
+      const geometry = new THREE.BoxGeometry(2,2,2);
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
 
       camera.position.z = 5;
 
-      const words = ['cat', 'dog', 'fish', 'bird', 'elephant', 'panda', 'tiger', 'lion', 'monkey', 'giraffe', 'zebra', 'rhinoceros', 'kangaroo', 'hippopotamus', 'crocodile', 'chicken', 'horse', 'octopus', 'penguin', 'koala', 'polar bear', 'dolphin', 'gorilla', 'turtle', 'flamingo', 'peacock', 'parrot', 'pigeon'];
+      const animals = ['cat', 'dog', 'fish', 'bird', 'elephant', 'panda', 'tiger', 'lion', 'monkey', 'giraffe', 'zebra', 'rhinoceros', 'kangaroo', 'hippopotamus', 'crocodile', 'chicken', 'horse', 'octopus', 'penguin', 'koala', 'polar bear', 'dolphin', 'gorilla', 'turtle', 'flamingo', 'peacock', 'parrot', 'pigeon'];
+ const vegetarianFood = [
+  "Vegetable Stir Fry",
+  "Caprese Salad",
+  "Quinoa Bowl",
+  "Eggplant Parmesan",
+  "Hummus Wrap",
+  "Spinach and Feta Stuffed Mushrooms",
+  "Chickpea Curry",
+  "Roasted Vegetable Pizza",
+  "Avocado Toast",
+  "Tomato Basil Bruschetta",
+  "Vegetarian Sushi Rolls",
+  "Mushroom Risotto",
+  "Sweet Potato and Black Bean Quesadilla",
+  "Greek Salad",
+  "Cauliflower Steak",
+  "Zucchini Noodles with Pesto",
+  "Vegetarian Spring Rolls",
+  "Broccoli and Cheddar Stuffed Peppers",
+  "Lentil Soup",
+  "Cucumber Avocado Rolls"
+];
+const colors = [
+  "Red",
+  "Orange",
+  "Yellow",
+  "Green",
+  "Blue",
+  "Indigo",
+  "Violet",
+  "Purple",
+  "Pink",
+  "Brown",
+  "Gray",
+  "Black",
+  "White",
+  "Cyan",
+  "Magenta",
+  "Lime",
+  "Maroon",
+  "Teal",
+  "Navy",
+  "Silver"
+];
+
+
+const words=animals.concat(vegetarianFood, colors);
 // Set the correct answer button
         const correctButton = document.getElementById('correct-button');
         
-        correctButton.removeEventListener('click', handleAnswer);
+        //correctButton.removeEventListener('click', handleAnswer);
         correctButton.addEventListener('click', () => handleAnswer(true));
 
        // Set incorrect answer buttons
         const incorrectButtons = document.querySelectorAll('.animal-button:not(#correct-button)');
         for (let i = 0; i < incorrectButtons.length; i++) {
-          incorrectButtons[i].removeEventListener('click', handleAnswer);
+          //incorrectButtons[i].removeEventListener('click', handleAnswer);
           incorrectButtons[i].addEventListener('click', () => handleAnswer(false));
         }
       
@@ -96,7 +147,8 @@
       const resultElement = document.getElementById('result');
 
       function displayWord() {
-        const randomWord = words[Math.floor(Math.random() * words.length)];
+        const shuffledWords = shuffleArray(words);
+        const randomWord = shuffledWords[shuffledWords.length-1];
 
         // Display the word using HTML
         const wordContainer = document.getElementById('word-container');
@@ -112,14 +164,26 @@
         synth.speak(utterance);
 
         // Shuffle the words for button placement
-        const shuffledWords = shuffleArray(words);
+        
         correctButton.innerText = randomWord;
         
         // Set incorrect answer buttons
         const incorrectButtons = document.querySelectorAll('.animal-button:not(#correct-button)');
-        for (let i = 0; i < incorrectButtons.length; i++) {
+        for (let i = 0; i < incorrectButtons.length; i++) {          
           incorrectButtons[i].innerText = shuffledWords[i];
         }
+
+	container= document.querySelector(".button-container");
+	elements = Array.from(container.children);
+	const shuffledElements = elements.sort(() => Math.random() - 0.5);
+while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    // Add back the shuffled elements
+    shuffledElements.forEach(element => {
+      container.appendChild(element);
+    });
       }
 
       function handleAnswer(isCorrect) {
@@ -129,16 +193,21 @@
           resultElement.innerText = 'Correct!';
           resultElement.classList.remove('wrong');
           resultElement.classList.add('correct');
-        } else {
-          resultElement.innerText = 'Wrong!';
-          resultElement.classList.remove('correct');
-          resultElement.classList.add('wrong');
-        }
 
         setTimeout(() => {
           resultElement.innerText = '';
           displayWord();
         }, 1000);
+        } else {
+          resultElement.innerText = 'Try Again!';
+const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance("Try Again");
+        synth.speak(utterance);
+          resultElement.classList.remove('correct');
+          resultElement.classList.add('wrong');
+        }
+
+        
       }
 
       function shuffleArray(array) {
