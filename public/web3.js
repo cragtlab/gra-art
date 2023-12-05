@@ -11,6 +11,7 @@ async function fetchJSON(jsonFilePath) {
 let web3, accounts, networkId;
 let contractJSON, contract, paintingAddress, vipJSON, vipContract;
 let web3Paintings, web3Names;
+let nameRetrieved=false;
 async function clickConnect() {
     web3 = new Web3(window.ethereum);
     try {
@@ -33,6 +34,7 @@ async function clickConnect() {
 
         // try take name first as showing walletAddress
         web3Names = await contractX.methods.getNames().call(); // getNames
+        nameRetrieved=true;
         web3Paintings = await contractX.methods.getPaintings().call();
         
 
@@ -86,6 +88,7 @@ function getVIP() {
 async function refreshData() {
     web3Paintings = await contract.methods.getPaintings().call()
     web3Names = await getNames(); // store array into names[wallet_address] map
+    nameRetrieved=true;
     //console.log(web3Paintings);
     // show listed if listed
     for(i=0;i<web3Paintings.length;i++){
